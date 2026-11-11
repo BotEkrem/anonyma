@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: gateway
+    metrics_path: /healthz
+    static_configs:
+      - targets: ["gateway:3000"]
+  - job_name: core
+    metrics_path: /healthz
+    static_configs:
+      - targets: ["core:3001"]
+  - job_name: match
+    metrics_path: /healthz
+    static_configs:
+      - targets: ["match:3002"]
+  - job_name: realtime
+    metrics_path: /healthz
+    static_configs:
+      - targets: ["realtime:3003"]

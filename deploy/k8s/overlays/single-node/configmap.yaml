@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: anonyma-config
+  namespace: anonyma
+data:
+  NODE_ENV: "production"
+  RABBITMQ_EXCHANGE: "anonyma.events"
+  SESSION_COOKIE_NAME: "anonyma_sid"
+  SESSION_TTL_SECONDS: "86400"
+  MESSAGE_TTL_SECONDS: "600"
+  COOKIE_SECURE: "true"
+  TURNSTILE_SKIP: "false"
+  TURNSTILE_VERIFY_URL: "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+  # Placeholders — bootstrap rewrites chat.example.com → PUBLIC_HOST
+  PUBLIC_WEB_ORIGIN: "https://chat.example.com"
+  PUBLIC_API_URL: "https://chat.example.com"
+  PUBLIC_WS_URL: "wss://chat.example.com/ws"
+  # Web CSP connect-src extras: this site's wss + the LiveKit host (bootstrap
+  # rewrites rtc.example.com from LIVEKIT_URL).
+  CSP_CONNECT_EXTRA: "wss://chat.example.com wss://rtc.example.com https://rtc.example.com"

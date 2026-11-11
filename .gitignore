@@ -1,0 +1,24 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.local
+*.log
+.DS_Store
+target/
+.turbo/
+*.tsbuildinfo
+.idea/
+.vscode/
+.cursor/
+docs/
+apps/realtime/target/
+production.env
+deploy/k8s/secrets.yaml
+# local env
+# deps / build
+**/target/
+deploy/k8s/overlays/single-node/secrets.yaml
+deploy/k8s/overlays/single-node/gateway-secrets.yaml
+deploy/k8s/overlays/single-node/grafana-secret.yaml

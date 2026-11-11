@@ -1,0 +1,622 @@
+{
+ "name": "Anonyma Hush",
+ "version": 1,
+ "color": {
+  "themes": [
+   {
+    "id": "mist",
+    "name": "Mist (light)"
+   },
+   {
+    "id": "dusk",
+    "name": "Dusk (dark)"
+   }
+  ],
+  "tokens": [
+   {
+    "name": "canvas",
+    "value": {
+     "mist": "#E7E4EC",
+     "dusk": "#141415"
+    },
+    "usage": "The one ground everything is pressed from: page background and the face of every raised or sunken element. Neumorphism needs surfaces to share it."
+   },
+   {
+    "name": "surface",
+    "value": "{canvas}",
+    "usage": "Raised controls and cards. Same as canvas on purpose: elevation comes from the shadow pair, never from a lighter fill."
+   },
+   {
+    "name": "surface-sunken",
+    "value": {
+     "mist": "#DEDAE4",
+     "dusk": "#0F0F10"
+    },
+    "usage": "Wells: inputs, the composer field, the segmented-control track, the switch track, reply quotes."
+   },
+   {
+    "name": "surface-overlay",
+    "value": {
+     "mist": "#F0EDF4",
+     "dusk": "#1F1F21"
+    },
+    "usage": "Things that float above the page instead of being pressed from it: menus, popovers, toasts, dialogs. Pair with shadow-float."
+   },
+   {
+    "name": "ink",
+    "value": {
+     "mist": "#29242F",
+     "dusk": "#EDEDEF"
+    },
+    "usage": "Primary text and icons on canvas, surface, surface-sunken, surface-overlay and accent-tint. 9:1 or better in both themes."
+   },
+   {
+    "name": "ink-soft",
+    "value": {
+     "mist": "#4C4655",
+     "dusk": "#B8B8BC"
+    },
+    "usage": "Secondary text: blurbs, helper lines, the other person's nickname. Legible on every neutral and on accent-tint."
+   },
+   {
+    "name": "ink-faint",
+    "value": {
+     "mist": "#615A6A",
+     "dusk": "#909096"
+    },
+    "usage": "Tertiary text: placeholders, timestamps, counts. Still 4.5:1 on every neutral, so it can carry meaning."
+   },
+   {
+    "name": "line",
+    "value": {
+     "mist": "#D4CFDC",
+     "dusk": "#28282A"
+    },
+    "usage": "Decorative hairlines that separate without carrying meaning (list dividers, the edge highlight on raised cards)."
+   },
+   {
+    "name": "line-strong",
+    "value": {
+     "mist": "#7D7687",
+     "dusk": "#6C6C72"
+    },
+    "usage": "Edges that must be seen: the input underline, checkbox frames, the focus-visible edge of a well. 3:1 on canvas and surface-sunken."
+   },
+   {
+    "name": "accent",
+    "value": {
+     "mist": "#A3520F",
+     "dusk": "#F0A35E"
+    },
+    "usage": "Amber: the one brand hue. Primary button fill, the selected mode, the focus ring, the expiry ring, live indicators. Text on it is on-accent."
+   },
+   {
+    "name": "accent-ink",
+    "value": {
+     "mist": "#8C460B",
+     "dusk": "#F5B87D"
+    },
+    "usage": "Accent as text: links, the active nav label, your own read ticks. 4.5:1 on canvas, overlay and accent-tint."
+   },
+   {
+    "name": "on-accent",
+    "value": {
+     "mist": "#FFFFFF",
+     "dusk": "#2B1806"
+    },
+    "usage": "Text and icons on an accent fill. Dark in Dusk because the accent lightens there."
+   },
+   {
+    "name": "accent-tint",
+    "value": {
+     "mist": "#F2E2D0",
+     "dusk": "#3A2E22"
+    },
+    "usage": "Your own message bubble and the selected reaction chip. ink, ink-soft and accent-ink all read on it."
+   },
+   {
+    "name": "accent-glow",
+    "value": {
+     "mist": "#A3520F59",
+     "dusk": "#F0A35E59"
+    },
+    "usage": "Soft halo for live states only (speaking tile, recording, the send spark). Never a resting decoration."
+   },
+   {
+    "name": "mode-text",
+    "value": "{accent}",
+    "usage": "Text rooms. Mode colors appear as a dot, a ring or a tint, never as large fills."
+   },
+   {
+    "name": "mode-voice",
+    "value": {
+     "mist": "#2A64AD",
+     "dusk": "#7EB3F0"
+    },
+    "usage": "Voice rooms: dot, ring, chip text. 4.5:1 on canvas and mode-voice-tint."
+   },
+   {
+    "name": "mode-voice-tint",
+    "value": {
+     "mist": "#D9E4F2",
+     "dusk": "#22303F"
+    },
+    "usage": "Voice chip and voice card wash."
+   },
+   {
+    "name": "mode-video",
+    "value": {
+     "mist": "#14625D",
+     "dusk": "#63C9C2"
+    },
+    "usage": "Video rooms: dot, ring, chip text. 4.5:1 on canvas and mode-video-tint."
+   },
+   {
+    "name": "mode-video-tint",
+    "value": {
+     "mist": "#D2E8E5",
+     "dusk": "#213433"
+    },
+    "usage": "Video chip and video card wash."
+   },
+   {
+    "name": "online",
+    "value": {
+     "mist": "#1F6747",
+     "dusk": "#74CFA3"
+    },
+    "usage": "Presence and success. Always next to a word or count (\"3 online\"): never color alone."
+   },
+   {
+    "name": "warning",
+    "value": {
+     "mist": "#6C5904",
+     "dusk": "#E5C95E"
+    },
+    "usage": "Reconnecting, weak connection. Always with a label. Leans yellow so it never reads as the amber accent."
+   },
+   {
+    "name": "danger",
+    "value": {
+     "mist": "#A12437",
+     "dusk": "#F47A81"
+    },
+    "usage": "Errors and destructive confirmations. Always with a label or icon; distinct from the amber accent by a red lean and a darker tone."
+   },
+   {
+    "name": "ring",
+    "value": "{accent}",
+    "usage": "Focus-visible ring: 2px canvas gap, then 2px ring. 3:1 or better on every surface it lands on."
+   },
+   {
+    "name": "shadow-light",
+    "value": {
+     "mist": "#FFFFFFE6",
+     "dusk": "#FFFFFF0F"
+    },
+    "usage": "The lit side of a neumorphic shadow (light comes from the top left). Used by the shadow tokens; use it directly only for a custom elevation."
+   },
+   {
+    "name": "shadow-dark",
+    "value": {
+     "mist": "#A399B48C",
+     "dusk": "#000000E0"
+    },
+    "usage": "The shaded side of a neumorphic shadow (bottom right)."
+   },
+   {
+    "name": "stage",
+    "value": {
+     "mist": "#1C1A21",
+     "dusk": "#0D0D0E"
+    },
+    "usage": "Call stage background. Video reads best on near-black, so calls stay dark in both themes."
+   },
+   {
+    "name": "stage-raised",
+    "value": {
+     "mist": "#24212A",
+     "dusk": "#18181A"
+    },
+    "usage": "Tiles and the control dock on the stage."
+   },
+   {
+    "name": "stage-ink",
+    "value": {
+     "mist": "#EEEAF2",
+     "dusk": "#EDEDEF"
+    },
+    "usage": "Names and icons on the stage and stage-raised."
+   }
+  ]
+ },
+ "shadow": {
+  "note": "Neumorphic pairs (light from the top left) for things pressed from the canvas, shadow-float for overlays, shadow-glow for live states.",
+  "tokens": [
+   {
+    "name": "shadow-raised-sm",
+    "value": {
+     "mist": "-3px -3px 7px #FFFFFFE6, 3px 3px 7px #A399B48C",
+     "dusk": "-3px -3px 7px #FFFFFF0F, 3px 3px 8px #000000E0"
+    },
+    "usage": "Small raised things: reaction chips, icon buttons, the switch knob, message bubbles."
+   },
+   {
+    "name": "shadow-raised",
+    "value": {
+     "mist": "-6px -6px 14px #FFFFFFE6, 6px 6px 16px #A399B48C",
+     "dusk": "-6px -6px 14px #FFFFFF0F, 6px 6px 18px #000000E0"
+    },
+    "usage": "Default raised: buttons, cards, the composer bar, nav pill."
+   },
+   {
+    "name": "shadow-raised-lg",
+    "value": {
+     "mist": "-14px -14px 30px #FFFFFFE6, 14px 14px 32px #A399B48C",
+     "dusk": "-14px -14px 30px #FFFFFF0F, 14px 14px 34px #000000E0"
+    },
+    "usage": "Hero cards and the one focal surface of a screen (lobby mode cards on hover, the landing card). At most one per screen."
+   },
+   {
+    "name": "shadow-inset",
+    "value": {
+     "mist": "inset 4px 4px 9px #A399B48C, inset -4px -4px 9px #FFFFFFE6",
+     "dusk": "inset 4px 4px 10px #000000E0, inset -4px -4px 9px #FFFFFF0F"
+    },
+    "usage": "Wells and pressed states: inputs, the composer field, tracks, a pressed button."
+   },
+   {
+    "name": "shadow-inset-sm",
+    "value": {
+     "mist": "inset 2px 2px 5px #A399B48C, inset -2px -2px 5px #FFFFFFE6",
+     "dusk": "inset 2px 2px 5px #000000E0, inset -2px -2px 5px #FFFFFF0F"
+    },
+    "usage": "Small pressed things: a selected reaction chip, the reply quote, an active nav item."
+   },
+   {
+    "name": "shadow-float",
+    "value": {
+     "mist": "0 24px 48px -12px #29242F47, 0 2px 6px #29242F14",
+     "dusk": "0 24px 48px -12px #00000099, 0 2px 6px #00000066"
+    },
+    "usage": "Overlays that leave the surface: menus, popovers, toasts, dialogs. Neumorphic shadows are for things pressed from the canvas, this one for things that float."
+   },
+   {
+    "name": "shadow-glow",
+    "value": {
+     "mist": "0 0 0 2px #A3520F, 0 0 22px #A3520F59",
+     "dusk": "0 0 0 2px #F0A35E, 0 0 22px #F0A35E59"
+    },
+    "usage": "Live states only: the speaking tile, an active recording, the send spark's flash."
+   },
+   {
+    "name": "shadow-focus",
+    "value": {
+     "mist": "0 0 0 2px #E7E4EC, 0 0 0 4px #A3520F",
+     "dusk": "0 0 0 2px #141415, 0 0 0 4px #F0A35E"
+    },
+    "usage": "Keyboard focus on any control (with :focus-visible). Combine with the control's own shadow."
+   },
+   {
+    "name": "shadow-stage-raised",
+    "value": "-4px -4px 10px #FFFFFF0D, 4px 4px 12px #000000A6",
+    "usage": "Tiles and the control dock on the call stage. The stage is dark in both themes, so this pair is the same in both."
+   },
+   {
+    "name": "shadow-stage-inset",
+    "value": "inset 3px 3px 8px #000000A6, inset -3px -3px 8px #FFFFFF0D",
+    "usage": "Wells on the stage: the voice orb, the volume track."
+   }
+  ]
+ },
+ "type": {
+  "fonts": [],
+  "families": {
+   "display": "\"Unbounded\", \"Figtree\", system-ui, sans-serif",
+   "sans": "\"Figtree\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+   "mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", Menlo, monospace"
+  },
+  "groups": [
+   {
+    "name": "Display",
+    "family": "display",
+    "note": "Unbounded: wide, rounded and confident. Headlines, room names and big numbers only; never running text.",
+    "styles": [
+     {
+      "name": "hero",
+      "fontSize": "56px",
+      "lineHeight": "60px",
+      "fontWeight": 600,
+      "letterSpacing": "-0.03em",
+      "sample": "Words that vanish in ten minutes.",
+      "usage": "The landing headline. One per page."
+     },
+     {
+      "name": "title-1",
+      "fontSize": "36px",
+      "lineHeight": "42px",
+      "fontWeight": 600,
+      "letterSpacing": "-0.02em",
+      "sample": "Rooms",
+      "usage": "Page titles (Rooms, Match, Monitoring)."
+     },
+     {
+      "name": "title-2",
+      "fontSize": "24px",
+      "lineHeight": "30px",
+      "fontWeight": 600,
+      "letterSpacing": "-0.015em",
+      "sample": "#t4n38lzbun",
+      "usage": "The room name in the chat header; card titles on the landing page."
+     },
+     {
+      "name": "title-3",
+      "fontSize": "18px",
+      "lineHeight": "24px",
+      "fontWeight": 500,
+      "letterSpacing": "-0.01em",
+      "sample": "Video",
+      "usage": "Mode card titles, dialog titles, section heads."
+     }
+    ]
+   },
+   {
+    "name": "Text",
+    "family": "sans",
+    "note": "Figtree: friendly and very legible at chat sizes. Everything people read and type.",
+    "styles": [
+     {
+      "name": "body",
+      "fontSize": "16px",
+      "lineHeight": "26px",
+      "fontWeight": 400,
+      "sample": "Pick text, voice, or video. Everything disappears ten minutes after the last message.",
+      "usage": "Prose: landing copy, empty states, explanations. Keep lines near 65 characters."
+     },
+     {
+      "name": "message",
+      "fontSize": "15px",
+      "lineHeight": "22px",
+      "fontWeight": 400,
+      "sample": "anyone up for a quick call?",
+      "usage": "Message bubbles. Never smaller: chat is the product."
+     },
+     {
+      "name": "ui",
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 500,
+      "sample": "Join with invite",
+      "usage": "Buttons, inputs, menu items, tabs."
+     },
+     {
+      "name": "label",
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": 600,
+      "letterSpacing": "0.01em",
+      "sample": "Nickname",
+      "usage": "Field labels and the other person's nickname above a message run."
+     },
+     {
+      "name": "caption",
+      "fontSize": "12px",
+      "lineHeight": "16px",
+      "fontWeight": 500,
+      "sample": "Talk live, with text chat beside you.",
+      "usage": "Helper text, mode card blurbs, chip text."
+     }
+    ]
+   },
+   {
+    "name": "Mono",
+    "family": "mono",
+    "note": "JetBrains Mono for anything copied, counted or compared: codes, timers, pseudonyms, metrics.",
+    "styles": [
+     {
+      "name": "code",
+      "fontSize": "16px",
+      "lineHeight": "22px",
+      "fontWeight": 600,
+      "letterSpacing": "0.14em",
+      "sample": "RW8N465RC2Y4",
+      "usage": "Invite codes, in the field and on the ticket."
+     },
+     {
+      "name": "meta",
+      "fontSize": "12px",
+      "lineHeight": "16px",
+      "fontWeight": 500,
+      "letterSpacing": "0.02em",
+      "sample": "9:41 · edited",
+      "usage": "Timestamps, the expiry countdown, read marks, pseudonym ids."
+     },
+     {
+      "name": "figure",
+      "fontSize": "32px",
+      "lineHeight": "36px",
+      "fontWeight": 600,
+      "letterSpacing": "-0.02em",
+      "sample": "1,284",
+      "usage": "Monitoring numbers and live counts (tabular figures)."
+     }
+    ]
+   }
+  ]
+ },
+ "spacing": {
+  "note": "4px base.",
+  "tokens": [
+   {
+    "name": "space-1",
+    "value": "4px",
+    "usage": "Icon to label, dot to text."
+   },
+   {
+    "name": "space-2",
+    "value": "8px",
+    "usage": "Inside chips; between stacked bubbles of one person."
+   },
+   {
+    "name": "space-3",
+    "value": "12px",
+    "usage": "Inside buttons and inputs (vertical); between a label and its field."
+   },
+   {
+    "name": "space-4",
+    "value": "16px",
+    "usage": "Card and composer padding; the phone side gutter."
+   },
+   {
+    "name": "space-5",
+    "value": "20px",
+    "usage": "Between messages from different people."
+   },
+   {
+    "name": "space-6",
+    "value": "24px",
+    "usage": "Between groups inside a card; the desktop side gutter."
+   },
+   {
+    "name": "space-8",
+    "value": "32px",
+    "usage": "Between cards; above a section title."
+   },
+   {
+    "name": "space-10",
+    "value": "40px",
+    "usage": "Between page sections on phones."
+   },
+   {
+    "name": "space-12",
+    "value": "48px",
+    "usage": "Between page sections on desktop."
+   },
+   {
+    "name": "space-16",
+    "value": "64px",
+    "usage": "Around the landing hero."
+   }
+  ]
+ },
+ "radius": {
+  "note": "Generous and soft; pills for anything you toggle.",
+  "tokens": [
+   {
+    "name": "radius-xs",
+    "value": "8px",
+    "usage": "Reply quotes, small chips' inner wells."
+   },
+   {
+    "name": "radius-sm",
+    "value": "12px",
+    "usage": "Inputs, icon buttons' squares, toasts."
+   },
+   {
+    "name": "radius-md",
+    "value": "16px",
+    "usage": "Buttons, message bubbles, menu panels."
+   },
+   {
+    "name": "radius-lg",
+    "value": "22px",
+    "usage": "Cards, the composer bar, call tiles."
+   },
+   {
+    "name": "radius-xl",
+    "value": "30px",
+    "usage": "Hero cards, dialogs, the call stage."
+   },
+   {
+    "name": "radius-pill",
+    "value": "999px",
+    "usage": "Pills: nav, segmented control, chips, switches, the send button."
+   }
+  ]
+ },
+ "duration": {
+  "note": "Motion timing. prefers-reduced-motion drops every duration above dur-fast to 0.",
+  "tokens": [
+   {
+    "name": "dur-instant",
+    "value": "90ms",
+    "usage": "Press-in (a button sinking into the surface)."
+   },
+   {
+    "name": "dur-fast",
+    "value": "160ms",
+    "usage": "Hover lift, chip toggles, menu open."
+   },
+   {
+    "name": "dur-base",
+    "value": "240ms",
+    "usage": "Most transitions: bubbles arriving, tabs, panels."
+   },
+   {
+    "name": "dur-slow",
+    "value": "420ms",
+    "usage": "Page-level entrances and the segmented thumb travel."
+   },
+   {
+    "name": "dur-signature",
+    "value": "900ms",
+    "usage": "The few signature moments (a message shredding at expiry, the match reveal)."
+   },
+   {
+    "name": "dur-ambient",
+    "value": "14s",
+    "usage": "One slow loop of an ambient background."
+   }
+  ]
+ },
+ "easing": {
+  "note": "Curves for the durations above.",
+  "tokens": [
+   {
+    "name": "ease-soft",
+    "value": "cubic-bezier(0.22, 0.8, 0.24, 1)",
+    "usage": "Default: things settling into the surface."
+   },
+   {
+    "name": "ease-spring",
+    "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+    "usage": "Small overshoot for thumbs, knobs and chips."
+   },
+   {
+    "name": "ease-press",
+    "value": "cubic-bezier(0.4, 0, 0.6, 1)",
+    "usage": "Press-in and release."
+   },
+   {
+    "name": "ease-exit",
+    "value": "cubic-bezier(0.55, 0, 1, 0.45)",
+    "usage": "Leaving: toasts out, messages expiring."
+   }
+  ]
+ },
+ "zIndex": {
+  "note": "Stacking order.",
+  "tokens": [
+   {
+    "name": "z-nav",
+    "value": "20",
+    "usage": "Sticky header and the mobile tab bar."
+   },
+   {
+    "name": "z-overlay",
+    "value": "40",
+    "usage": "Menus and popovers."
+   },
+   {
+    "name": "z-toast",
+    "value": "50",
+    "usage": "Toasts."
+   },
+   {
+    "name": "z-modal",
+    "value": "60",
+    "usage": "Dialogs and their backdrop."
+   }
+  ]
+ }
+}

@@ -1,0 +1,214 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: anonyma
+spec:
+  replicas: 2
+  template:
+    spec:
+      imagePullSecrets:
+        - name: anonyma-registry
+      containers:
+        - name: gateway
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_TLS_DIR
+              value: /certs/rmq
+          volumeMounts:
+            - name: rmq-certs
+              mountPath: /certs/rmq
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /readyz, port: 3000 }
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        # The client certificate only: the CA and server keys stay on the host.
+        - name: rmq-certs
+          secret:
+            secretName: anonyma-rmq-client
+            defaultMode: 0440
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core
+  namespace: anonyma
+spec:
+  # Single replica on small-RAM hosts; scale to 2 when memory allows.
+  replicas: 1
+  template:
+    spec:
+      imagePullSecrets:
+        - name: anonyma-registry
+      containers:
+        - name: core
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_TLS_DIR
+              value: /certs/rmq
+          volumeMounts:
+            - name: rmq-certs
+              mountPath: /certs/rmq
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /readyz, port: 3001 }
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3001 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              cpu: 250m
+              memory: 160Mi
+      volumes:
+        # The client certificate only: the CA and server keys stay on the host.
+        - name: rmq-certs
+          secret:
+            secretName: anonyma-rmq-client
+            defaultMode: 0440
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: match
+  namespace: anonyma
+spec:
+  replicas: 1
+  template:
+    spec:
+      imagePullSecrets:
+        - name: anonyma-registry
+      containers:
+        - name: match
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_TLS_DIR
+              value: /certs/rmq
+          volumeMounts:
+            - name: rmq-certs
+              mountPath: /certs/rmq
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /readyz, port: 3002 }
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3002 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 150m
+              memory: 112Mi
+      volumes:
+        # The client certificate only: the CA and server keys stay on the host.
+        - name: rmq-certs
+          secret:
+            secretName: anonyma-rmq-client
+            defaultMode: 0440
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realtime
+  namespace: anonyma
+spec:
+  replicas: 2
+  template:
+    spec:
+      imagePullSecrets:
+        - name: anonyma-registry
+      containers:
+        - name: realtime
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RABBITMQ_TLS_DIR
+              value: /certs/rmq
+            - name: SSL_CERT_FILE
+              value: /certs/rmq/ca.pem
+          volumeMounts:
+            - name: rmq-certs
+              mountPath: /certs/rmq
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /readyz, port: 3003 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3003 }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 15m
+              memory: 24Mi
+            limits:
+              cpu: 150m
+              memory: 64Mi
+      volumes:
+        # The client certificate only: the CA and server keys stay on the host.
+        - name: rmq-certs
+          secret:
+            secretName: anonyma-rmq-client
+            defaultMode: 0440
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: anonyma
+spec:
+  replicas: 1
+  template:
+    spec:
+      imagePullSecrets:
+        - name: anonyma-registry
+      containers:
+        - name: web
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 24Mi
+            limits:
+              cpu: 100m
+              memory: 48Mi
+---
+# Disable HPA on this tiny node — keep fixed pod HA replicas.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+  namespace: anonyma
+$patch: delete
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: realtime
+  namespace: anonyma
+$patch: delete

@@ -1,0 +1,364 @@
+name: anonyma
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: "3" }
+
+services:
+  postgres:
+    <<: *logging
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: anonyma
+      POSTGRES_DB: anonyma
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - anonyma_pg_data:/var/lib/postgresql/data
+    networks: [anonyma_internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anonyma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256m }
+
+  mongo:
+    <<: *logging
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: anonyma
+      MONGO_INITDB_DATABASE: anonyma
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?set MONGO_PASSWORD}
+    volumes:
+      - anonyma_mongo_data:/data/db
+    networks: [anonyma_internal]
+    healthcheck:
+      # mongosh is heavy; give it room or compose treats mongo as unhealthy and blocks deploys
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --quiet -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand({ ping: 1 }).ok" | grep -q 1',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 384m }
+
+  redis:
+    <<: *logging
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--requirepass",
+        "${REDIS_PASSWORD:?set REDIS_PASSWORD}",
+        "--save",
+        "",
+        "--appendonly",
+        "no",
+        "--maxmemory",
+        "64mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    networks: [anonyma_internal]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?set REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 96m }
+
+  turnstile-proxy:
+    <<: *logging
+    image: node:22-alpine
+    restart: unless-stopped
+    command: ["node", "/app/turnstile-proxy.js"]
+    environment:
+      PORT: "8791"
+    volumes:
+      - ./deploy/docker/turnstile-proxy.js:/app/turnstile-proxy.js:ro
+    networks:
+      anonyma_internal: {}
+      edge: {}
+    deploy:
+      resources:
+        limits: { cpus: "0.1", memory: 64m }
+
+  rmq-certs:
+    <<: *logging
+    # Reuse rabbitmq image (openssl already present) — no apk/CDN at deploy time.
+    image: rabbitmq:3.13-alpine
+    restart: "no"
+    user: "0"
+    environment:
+      PATH: /opt/openssl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    volumes:
+      - anonyma_rmq_certs:/certs
+      - ./deploy/docker/rmq-gen-certs.sh:/gen.sh:ro
+    entrypoint: ["/bin/sh", "/gen.sh", "/certs"]
+    networks: [anonyma_internal]
+
+  rabbitmq:
+    <<: *logging
+    image: rabbitmq:3.13-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: anonyma
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD}
+    volumes:
+      - anonyma_rmq_certs:/certs:ro
+      - ./deploy/docker/rabbitmq-tls.conf:/etc/rabbitmq/conf.d/20-tls.conf:ro
+    networks: [anonyma_internal]
+    depends_on:
+      rmq-certs: { condition: service_completed_successfully }
+    healthcheck:
+      # ping alone can pass before the TLS listener binds — wait for 5671.
+      test:
+        [
+          "CMD-SHELL",
+          "rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q check_port_connectivity",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256m }
+
+  core:
+    <<: *logging
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.nest
+      args: { APP: core }
+    image: anonyma-core:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      CORE_PORT: "3001"
+      DATABASE_URL: postgresql://anonyma:${POSTGRES_PASSWORD}@postgres:5432/anonyma
+      MONGO_URI: mongodb://anonyma:${MONGO_PASSWORD}@mongo:27017/anonyma?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqps://anonyma:${RABBITMQ_PASSWORD}@rabbitmq:5671
+      RABBITMQ_EXCHANGE: anonyma.events
+      RABBITMQ_TLS_DIR: /certs
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY:?set MESSAGE_ENCRYPTION_KEY}
+      INTERNAL_RPC_SECRET: ${INTERNAL_RPC_SECRET:?set INTERNAL_RPC_SECRET}
+      WS_TICKET_SECRET: ${WS_TICKET_SECRET:?set WS_TICKET_SECRET}
+      MESSAGE_TTL_SECONDS: ${MESSAGE_TTL_SECONDS:-600}
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-86400}
+    volumes:
+      - anonyma_rmq_certs:/certs:ro
+    networks: [anonyma_internal]
+    depends_on:
+      postgres: { condition: service_healthy }
+      mongo: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 192m }
+
+  match:
+    <<: *logging
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.nest
+      args: { APP: match }
+    image: anonyma-match:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      MATCH_PORT: "3002"
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqps://anonyma:${RABBITMQ_PASSWORD}@rabbitmq:5671
+      RABBITMQ_EXCHANGE: anonyma.events
+      RABBITMQ_TLS_DIR: /certs
+      INTERNAL_RPC_SECRET: ${INTERNAL_RPC_SECRET}
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY:?set MESSAGE_ENCRYPTION_KEY}
+    volumes:
+      - anonyma_rmq_certs:/certs:ro
+    networks: [anonyma_internal]
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      core: { condition: service_healthy }
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3002/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 128m }
+
+  gateway:
+    <<: *logging
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.nest
+      args: { APP: gateway }
+    image: anonyma-gateway:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      GATEWAY_PORT: "3000"
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqps://anonyma:${RABBITMQ_PASSWORD}@rabbitmq:5671
+      RABBITMQ_TLS_DIR: /certs
+      INTERNAL_RPC_SECRET: ${INTERNAL_RPC_SECRET}
+      WS_TICKET_SECRET: ${WS_TICKET_SECRET}
+      IDENTITY_PEPPER: ${IDENTITY_PEPPER:?set IDENTITY_PEPPER}
+      PUBLIC_WEB_ORIGIN: https://${DOMAIN:?DOMAIN}
+      PUBLIC_API_URL: https://${DOMAIN:?DOMAIN}
+      PUBLIC_WS_URL: wss://${DOMAIN:?DOMAIN}/ws
+      TURNSTILE_SKIP: ${TURNSTILE_SKIP:-false}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_VERIFY_URL: http://turnstile-proxy:8791/siteverify
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+      COOKIE_SECURE: "true"
+      SESSION_COOKIE_NAME: anonyma_sid
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-86400}
+      MESSAGE_TTL_SECONDS: ${MESSAGE_TTL_SECONDS:-600}
+    volumes:
+      - anonyma_rmq_certs:/certs:ro
+    # Internal only — Turnstile egress via turnstile-proxy on edge
+    networks: [anonyma_internal]
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      core: { condition: service_healthy }
+      match: { condition: service_healthy }
+      turnstile-proxy: { condition: service_started }
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 128m }
+
+  realtime:
+    <<: *logging
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.realtime
+    image: anonyma-realtime:local
+    restart: unless-stopped
+    environment:
+      REALTIME_PORT: "3003"
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqps://anonyma:${RABBITMQ_PASSWORD}@rabbitmq:5671
+      RABBITMQ_EXCHANGE: anonyma.events
+      RABBITMQ_TLS_DIR: /certs
+      SSL_CERT_FILE: /certs/ca.pem
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY}
+      WS_TICKET_SECRET: ${WS_TICKET_SECRET}
+      PUBLIC_WEB_ORIGIN: https://${DOMAIN:?DOMAIN}
+    volumes:
+      - anonyma_rmq_certs:/certs:ro
+    networks: [anonyma_internal]
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 96m }
+
+  web:
+    <<: *logging
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.web
+    image: anonyma-web:local
+    restart: unless-stopped
+    environment:
+      # Page CSP connect-src extras (this site's wss + the LiveKit host); default any wss.
+      CSP_CONNECT_EXTRA: ${CSP_CONNECT_EXTRA:-wss:}
+    networks:
+      anonyma_internal: {}
+      edge: {}
+    depends_on:
+      gateway: { condition: service_healthy }
+      realtime: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${EDGE_NETWORK:?EDGE_NETWORK}
+      - "traefik.http.routers.anonyma-http.rule=Host(`${DOMAIN:?DOMAIN}`)"
+      - traefik.http.routers.anonyma-http.entrypoints=web
+      - traefik.http.routers.anonyma-http.middlewares=anonyma-redirect
+      - traefik.http.middlewares.anonyma-redirect.redirectscheme.scheme=https
+      - "traefik.http.routers.anonyma.rule=Host(`${DOMAIN:?DOMAIN}`)"
+      - traefik.http.routers.anonyma.entrypoints=websecure
+      - traefik.http.routers.anonyma.tls=true
+      - traefik.http.routers.anonyma.tls.certresolver=${CERT_RESOLVER:-letsencrypt}
+      - traefik.http.services.anonyma.loadbalancer.server.port=8080
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 64m }
+
+volumes:
+  anonyma_pg_data:
+  anonyma_mongo_data:
+  anonyma_rmq_certs:
+
+networks:
+  anonyma_internal:
+    internal: true
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:?EDGE_NETWORK}

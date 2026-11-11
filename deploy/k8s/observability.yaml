@@ -1,0 +1,289 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: anonyma
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: anonyma-prometheus
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/proxy", "nodes/metrics", "services", "endpoints", "pods"]
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: anonyma-prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: anonyma-prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: anonyma
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: anonyma
+spec:
+  replicas: 1
+  # One pod at a time: a second Prometheus cannot open the same TSDB.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.55.1
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.retention.time=7d
+            - --storage.tsdb.retention.size=2GB
+            - --storage.tsdb.path=/prometheus
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        # History survives restarts and deploys (it lived in the container
+        # and every restart emptied the dashboards).
+        - name: data
+          persistentVolumeClaim:
+            claimName: prometheus-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data
+  namespace: anonyma
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: anonyma
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+    scrape_configs:
+      # EVERY POD, not the Service: through the Service each scrape reached
+      # one random replica, so gauges read one pod and counters jumped
+      # between pods (gateway and realtime run two). instance is the pod's
+      # name, never its address.
+      - job_name: gateway
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [anonyma]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: gateway
+            action: keep
+          - target_label: app
+            replacement: gateway
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: instance
+      - job_name: core
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [anonyma]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: core
+            action: keep
+          - target_label: app
+            replacement: core
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: instance
+      - job_name: match
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [anonyma]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: match
+            action: keep
+          - target_label: app
+            replacement: match
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: instance
+      - job_name: realtime
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [anonyma]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: realtime
+            action: keep
+          - target_label: app
+            replacement: realtime
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: instance
+      - job_name: kube-state-metrics
+        metrics_path: /metrics
+        static_configs:
+          - targets: ["kube-state-metrics:8080"]
+      - job_name: cadvisor
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        tls_config:
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+          # Do not map node labels (hostname / role) onto scrape targets.
+          - target_label: instance
+            replacement: cadvisor
+          - regex: "kubernetes_io_hostname|__meta_kubernetes_node_name|__meta_kubernetes_node_label_.+"
+            action: labeldrop
+        metric_relabel_configs:
+          - source_labels: [namespace]
+            regex: anonyma
+            action: keep
+          - regex: "instance|node|pod_node|kubernetes_io_hostname|host_ip|internal_ip|external_ip|beta_kubernetes_io_.+|node_role_kubernetes_io_.+|node_kubernetes_io_.+"
+            action: labeldrop
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: anonyma
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - port: 9090
+      targetPort: 9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: anonyma
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.3.1
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-grafana
+                  key: GF_SECURITY_ADMIN_USER
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-grafana
+                  key: GF_SECURITY_ADMIN_PASSWORD
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+            # Admin only: the public numbers are on the site's /monitoring page,
+            # read by the gateway straight from Prometheus.
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "false"
+            - name: GF_AUTH_DISABLE_LOGIN_FORM
+              value: "false"
+            - name: GF_USERS_VIEWERS_CAN_EDIT
+              value: "false"
+            - name: GF_AUTH_ANONYMOUS_HIDE_VERSION
+              value: "true"
+            - name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH
+              value: /var/lib/grafana/dashboards/anonyma-overview.json
+            - name: GF_SERVER_ROOT_URL
+              value: "%(protocol)s://%(domain)s/"
+            - name: GF_ANALYTICS_REPORTING_ENABLED
+              value: "false"
+            - name: GF_ANALYTICS_CHECK_FOR_UPDATES
+              value: "false"
+            - name: GF_NEWS_NEWS_FEED_ENABLED
+              value: "false"
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: 20m
+              memory: 96Mi
+            limits:
+              memory: 192Mi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: anonyma
+spec:
+  selector:
+    app: grafana
+  ports:
+    - port: 3000
+      targetPort: 3000

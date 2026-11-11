@@ -1,0 +1,21 @@
+# Headlamp lives in kube-system; Ingress must share that namespace so the
+# controller can resolve the Service without a cross-namespace reference.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: headlamp
+  namespace: kube-system
+spec:
+  ingressClassName: nginx
+  rules:
+    # Placeholder — bootstrap rewrites → HEADLAMP_HOST (or headlamp.$OPS_DOMAIN)
+    - host: headlamp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: headlamp
+                port:
+                  number: 80
