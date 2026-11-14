@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: anonyma
+spec:
+  ingressClassName: nginx
+  rules:
+    # Placeholder — bootstrap rewrites → GRAFANA_HOST (or grafana.$OPS_DOMAIN)
+    - host: grafana.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000

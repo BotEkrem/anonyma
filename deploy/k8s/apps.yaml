@@ -1,0 +1,533 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: anonyma
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      # App pods never call the Kubernetes API.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gateway
+          image: anonyma/gateway:0.1.0
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: anonyma-config
+            - secretRef:
+                name: anonyma-gateway-secrets
+          # Only the keys this service reads (not every password in anonyma-secrets).
+          env:
+            - name: INTERNAL_RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: INTERNAL_RPC_SECRET
+            - name: WS_TICKET_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: WS_TICKET_SECRET
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: REDIS_URL
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: RABBITMQ_URL
+            - name: GATEWAY_PORT
+              value: "3000"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: anonyma
+spec:
+  selector:
+    app: gateway
+  ports:
+    - port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core
+  namespace: anonyma
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      labels:
+        app: core
+    spec:
+      # App pods never call the Kubernetes API.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: core
+          image: anonyma/core:0.1.0
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: anonyma-config
+          # Only the keys this service reads (not every password in anonyma-secrets).
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: DATABASE_URL
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: MONGO_URI
+            - name: MESSAGE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: MESSAGE_ENCRYPTION_KEY
+            - name: MESSAGE_ENCRYPTION_KEY_PREVIOUS
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: MESSAGE_ENCRYPTION_KEY_PREVIOUS
+                  optional: true
+            - name: INTERNAL_RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: INTERNAL_RPC_SECRET
+            - name: WS_TICKET_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: WS_TICKET_SECRET
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: REDIS_URL
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: RABBITMQ_URL
+            - name: CORE_PORT
+              value: "3001"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              cpu: 300m
+              memory: 192Mi
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3001
+            initialDelaySeconds: 8
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core
+  namespace: anonyma
+spec:
+  selector:
+    app: core
+  ports:
+    - port: 3001
+      targetPort: 3001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: match
+  namespace: anonyma
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: match
+  template:
+    metadata:
+      labels:
+        app: match
+    spec:
+      # App pods never call the Kubernetes API.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: match
+          image: anonyma/match:0.1.0
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: anonyma-config
+          # Only the keys this service reads (not every password in anonyma-secrets).
+          env:
+            - name: MESSAGE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: MESSAGE_ENCRYPTION_KEY
+            - name: INTERNAL_RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: INTERNAL_RPC_SECRET
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: REDIS_URL
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: RABBITMQ_URL
+            - name: MATCH_PORT
+              value: "3002"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3002
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: match
+  namespace: anonyma
+spec:
+  selector:
+    app: match
+  ports:
+    - port: 3002
+      targetPort: 3002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realtime
+  namespace: anonyma
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: realtime
+  template:
+    metadata:
+      labels:
+        app: realtime
+    spec:
+      # App pods never call the Kubernetes API.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: realtime
+          image: anonyma/realtime:0.1.0
+          ports:
+            - containerPort: 3003
+          envFrom:
+            - configMapRef:
+                name: anonyma-config
+          # Only the keys this service reads (not every password in anonyma-secrets).
+          env:
+            - name: MESSAGE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: MESSAGE_ENCRYPTION_KEY
+            - name: WS_TICKET_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: WS_TICKET_SECRET
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: REDIS_URL
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: RABBITMQ_URL
+            - name: REALTIME_PORT
+              value: "3003"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 96Mi
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3003
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3003
+            initialDelaySeconds: 8
+            periodSeconds: 20
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: realtime
+  namespace: anonyma
+spec:
+  selector:
+    app: realtime
+  ports:
+    - port: 3003
+      targetPort: 3003
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: anonyma
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      # App pods never call the Kubernetes API.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: web
+          image: anonyma/web:0.1.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            # This site's wss and the LiveKit host, for the page's CSP connect-src.
+            - name: CSP_CONNECT_EXTRA
+              valueFrom:
+                configMapKeyRef:
+                  name: anonyma-config
+                  key: CSP_CONNECT_EXTRA
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            # nginx renders its config here at start (the root filesystem is read-only).
+            - name: conf-d
+              mountPath: /etc/nginx/conf.d
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: conf-d
+          emptyDir:
+            sizeLimit: 1Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: anonyma
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+  namespace: anonyma
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gateway
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: realtime
+  namespace: anonyma
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: realtime
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65

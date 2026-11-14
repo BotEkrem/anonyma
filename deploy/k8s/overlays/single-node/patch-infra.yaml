@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: anonyma
+spec:
+  template:
+    spec:
+      containers:
+        - name: redis
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: anonyma-secrets
+                  key: REDIS_PASSWORD
+          # requirepass from secret via shell form
+          command: ["sh", "-c"]
+          args:
+            - redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru --requirepass "$REDIS_PASSWORD"
+          resources:
+            requests:
+              cpu: 15m
+              memory: 32Mi
+            limits:
+              memory: 80Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: anonyma
+spec:
+  template:
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.13-alpine
+          ports:
+            - containerPort: 5671
+            - containerPort: 5672
+          volumeMounts:
+            - name: rmq-certs
+              mountPath: /certs
+              readOnly: true
+            - name: rmq-tls-config
+              mountPath: /etc/rabbitmq/conf.d/20-tls.conf
+              subPath: 20-tls.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              memory: 192Mi
+      volumes:
+        - name: rmq-certs
+          hostPath:
+            path: /var/lib/anonyma/rmq-certs
+            type: DirectoryOrCreate
+        - name: rmq-tls-config
+          configMap:
+            name: rabbitmq-tls-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: anonyma
+spec:
+  template:
+    spec:
+      containers:
+        - name: postgres
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              memory: 192Mi
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/anonyma/postgres
+            type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: anonyma
+spec:
+  template:
+    spec:
+      containers:
+        - name: mongo
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              memory: 384Mi
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/anonyma/mongo
+            type: DirectoryOrCreate

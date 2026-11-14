@@ -1,0 +1,93 @@
+/* From React Bits (reactbits.dev), MIT + Commons Clause: see LICENSE.md in this folder.
+   Anonyma: an overlay on a call tile. The mesh-gradient border and the glow's
+   shadows are React Bits'; the glow sits inside the edge (tiles clip their
+   content), and the whole edge fades in while `data-active`. */
+.border-glow {
+  --cursor-angle: 45deg;
+  --border-radius: 16px;
+  --cone-spread: 25;
+
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: var(--border-radius);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.75s ease-in-out;
+}
+
+.border-glow[data-active] {
+  opacity: 1;
+  transition: opacity 0.25s ease-out;
+}
+
+/* The coloured mesh-gradient border: a 2px ring, lit where the cone points. */
+.border-glow {
+  -webkit-mask-image: conic-gradient(
+    from var(--cursor-angle) at center,
+    black calc(var(--cone-spread) * 1%),
+    transparent calc((var(--cone-spread) + 15) * 1%),
+    transparent calc((100 - var(--cone-spread) - 15) * 1%),
+    black calc((100 - var(--cone-spread)) * 1%)
+  );
+  mask-image: conic-gradient(
+    from var(--cursor-angle) at center,
+    black calc(var(--cone-spread) * 1%),
+    transparent calc((var(--cone-spread) + 15) * 1%),
+    transparent calc((100 - var(--cone-spread) - 15) * 1%),
+    black calc((100 - var(--cone-spread)) * 1%)
+  );
+}
+
+.border-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background:
+    var(--gradient-one),
+    var(--gradient-two),
+    var(--gradient-three),
+    var(--gradient-four),
+    var(--gradient-five),
+    var(--gradient-six),
+    var(--gradient-seven),
+    var(--gradient-base);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* The glow just inside the edge, under a narrower cone. */
+.border-glow__light {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  -webkit-mask-image: conic-gradient(
+    from var(--cursor-angle) at center,
+    black 2.5%,
+    transparent 14%,
+    transparent 86%,
+    black 97.5%
+  );
+  mask-image: conic-gradient(
+    from var(--cursor-angle) at center,
+    black 2.5%,
+    transparent 14%,
+    transparent 86%,
+    black 97.5%
+  );
+  box-shadow:
+    inset 0 0 0 1px var(--glow-color),
+    inset 0 0 1px 0 var(--glow-color-60),
+    inset 0 0 3px 0 var(--glow-color-50),
+    inset 0 0 6px 0 var(--glow-color-40),
+    inset 0 0 15px 0 var(--glow-color-30),
+    inset 0 0 25px 2px var(--glow-color-20),
+    inset 0 0 50px 2px var(--glow-color-10);
+}

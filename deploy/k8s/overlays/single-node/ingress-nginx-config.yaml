@@ -1,0 +1,19 @@
+# Applied to ingress-nginx namespace (not rewritten by overlay namespace).
+# Dokploy Traefik terminates TLS and forwards CF-Connecting-IP; trust private peers
+# and take client IP from Cloudflare's header for rate-limit hashing.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+data:
+  use-forwarded-headers: "true"
+  compute-full-forwarded-for: "true"
+  enable-real-ip: "true"
+  forwarded-for-header: "CF-Connecting-IP"
+  proxy-real-ip-cidr: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8"
+  # Hide stack fingerprint if a backend still emits it.
+  hide-headers: "X-Powered-By"

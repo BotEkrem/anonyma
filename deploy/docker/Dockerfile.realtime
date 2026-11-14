@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile:1
+# The build stage runs on the build machine's own architecture and
+# cross-compiles for the target with cargo-zigbuild (zig links musl and builds
+# ring's C code). Building inside an emulated amd64 container from Apple
+# Silicon (QEMU) took over ten minutes; only the small runtime stage runs
+# under emulation now.
+FROM --platform=$BUILDPLATFORM rust:1.89-alpine AS build
+RUN apk add --no-cache musl-dev zig
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    cargo install --locked cargo-zigbuild@0.24.0
+ARG TARGETARCH
+RUN case "$TARGETARCH" in \
+      amd64) echo x86_64-unknown-linux-musl ;; \
+      arm64) echo aarch64-unknown-linux-musl ;; \
+      *) echo "unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
+    esac > /rust-target \
+ && rustup target add "$(cat /rust-target)"
+WORKDIR /app/apps/realtime
+COPY apps/realtime/Cargo.toml apps/realtime/Cargo.lock ./
+COPY apps/realtime/src ./src
+# Registry and target caches survive between builds: an unchanged dependency
+# set is not compiled again.
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/apps/realtime/target,id=realtime-target-${TARGETARCH} \
+    cargo zigbuild --release --locked --target "$(cat /rust-target)" \
+ && cp "target/$(cat /rust-target)/release/anonyma-realtime" /anonyma-realtime
+
+FROM alpine:3.21
+RUN apk add --no-cache ca-certificates libgcc wget \
+ && addgroup -S -g 10001 app \
+ && adduser -S -D -H -u 10001 -G app app
+WORKDIR /app
+COPY --from=build /anonyma-realtime /usr/local/bin/anonyma-realtime
+USER 10001:10001
+EXPOSE 3003
+CMD ["anonyma-realtime"]
