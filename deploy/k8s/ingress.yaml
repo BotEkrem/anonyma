@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: anonyma
+  namespace: anonyma
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # No access log for the app: an anonymous chat should not keep a record of
+    # who (client IP, browser) opened which room. Errors still go to the error log.
+    nginx.ingress.kubernetes.io/enable-access-log: "false"
+    # TLS terminates at the edge proxy; this Ingress is plain HTTP behind it.
+    # Real client IP comes from CF-Connecting-IP via ingress-nginx ConfigMap.
+    # Host is a placeholder — single-node bootstrap rewrites chat.example.com → PUBLIC_HOST.
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: chat.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 3000
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: realtime
+                port:
+                  number: 3003
+          - path: /healthz
+            pathType: Exact
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 3000
+          - path: /readyz
+            pathType: Exact
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80

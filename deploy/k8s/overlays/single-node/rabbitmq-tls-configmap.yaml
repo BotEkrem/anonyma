@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-tls-config
+  namespace: anonyma
+data:
+  20-tls.conf: |
+    ## Internal-only AMQPS with TLS (certs from /certs hostPath).
+    listeners.tcp = none
+    listeners.ssl.default = 5671
+    ssl_options.cacertfile = /certs/ca.pem
+    ssl_options.certfile   = /certs/server.pem
+    ssl_options.keyfile    = /certs/server-key.pem
+    ssl_options.verify     = verify_peer
+    # Every client (Nest services and realtime) presents the client certificate.
+    ssl_options.fail_if_no_peer_cert = true
+    ssl_options.versions.1 = tlsv1.2
+    ssl_options.versions.2 = tlsv1.3

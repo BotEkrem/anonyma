@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: anonyma
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  # apply secrets.yaml yourself (gitignored); do not commit it
+  - infra.yaml
+  - apps.yaml
+  - networkpolicy.yaml
+  # observability (Grafana/Prometheus) lives in overlays/single-node — needs anonyma-grafana secret
+  - ingress.yaml

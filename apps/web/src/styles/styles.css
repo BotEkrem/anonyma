@@ -1,0 +1,4727 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font: var(--t-body);
+  color: var(--ink);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  transition: color var(--dur-base) var(--ease-soft), background var(--dur-base) var(--ease-soft);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+  width: 100%;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.95rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.topbar nav > a {
+  opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.35rem 0.55rem;
+}
+
+.topbar a:hover {
+  opacity: 1;
+}
+
+.topbar .nav-logout {
+  min-height: 44px;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-toggle svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hero {
+  flex: 1;
+  display: grid;
+  align-items: end;
+  min-height: calc(100vh - 5.5rem);
+  padding: var(--space-10) var(--space-6) var(--space-12);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Two soft discs pressed out of the canvas behind the words: the material itself,
+   no picture. */
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--canvas);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero::before {
+  inset: 10% 6% auto auto;
+  width: min(44vw, 480px);
+  aspect-ratio: 1;
+  box-shadow: var(--shadow-raised-lg);
+  animation: hush-float var(--dur-ambient) var(--ease-soft) infinite alternate;
+}
+
+.hero::after {
+  right: calc(6% + min(44vw, 480px) * 0.32);
+  top: calc(10% + min(44vw, 480px) * 0.32);
+  width: min(15vw, 164px);
+  aspect-ratio: 1;
+  box-shadow: var(--shadow-inset);
+  background: radial-gradient(circle, var(--accent) 0 22%, var(--canvas) 23%);
+}
+
+@keyframes hush-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-14px); }
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+}
+
+.hero-copy .brand-hero {
+  font: var(--t-title-3);
+  font-family: var(--font-display);
+  color: var(--accent-ink);
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--space-4);
+  animation: rise var(--dur-slow) var(--ease-soft) both;
+}
+
+.hero-copy h1 {
+  font: var(--t-hero);
+  letter-spacing: var(--t-hero-tracking);
+  font-size: clamp(2.4rem, 7vw, 3.5rem);
+  line-height: 1.07;
+  margin: 0 0 var(--space-5);
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.hero-copy p {
+  font: var(--t-body);
+  margin: 0 0 var(--space-8);
+  max-width: 36ch;
+  color: var(--ink-soft);
+  animation: rise var(--dur-slow) var(--ease-soft) 0.12s both;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  animation: rise var(--dur-slow) var(--ease-soft) 0.2s both;
+}
+
+/* Buttons are pressed out of the canvas; a press sinks them in. */
+.btn {
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.35rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font: var(--t-ui);
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-soft),
+    transform var(--dur-fast) var(--ease-soft),
+    background var(--dur-fast) var(--ease-soft),
+    color var(--dur-fast) var(--ease-soft);
+}
+
+/* Hover lifts a little; the shadow keeps its size so it never reaches into a
+   neighbour (shadow-raised-lg is only for a lone focal surface). */
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn:active:not(:disabled) {
+  box-shadow: var(--shadow-inset);
+  transform: scale(0.985);
+  transition-duration: var(--dur-instant);
+}
+
+/* Disabled: a shallow well with faint text, so it still reads as a button
+   (flat, it looked like a plain label on the canvas). */
+.btn:disabled {
+  cursor: not-allowed;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+  color: var(--ink-faint);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.btn-primary:active:not(:disabled) {
+  box-shadow: var(--shadow-inset), inset 0 0 0 999px rgb(0 0 0 / 0.08);
+}
+
+.btn-ghost {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.panel {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 2rem;
+}
+
+.panel h1,
+.panel h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+  font-size: 1.75rem;
+}
+
+.panel h1 {
+  font-size: clamp(1.65rem, 3vw, 1.85rem);
+}
+
+.verify-hint {
+  margin: -0.5rem 0 1.1rem;
+  font-size: 0.95rem;
+}
+
+.muted {
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Section lede under a panel title — not nested captions inside cards. */
+.panel > p.muted {
+  margin: 0 0 1.25rem;
+}
+
+.grid-actions {
+  display: grid;
+  gap: 1.15rem 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.grid-actions + .grid-actions {
+  margin-top: 0.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.field input,
+.field select {
+  border: 1px solid var(--line);
+  background: var(--surface-sunken);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+}
+
+.field input:focus-visible,
+.field select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Chat pages fill the screen: the message list scrolls inside, the composer
+   stays at the bottom. With min-height the page grew and the composer drifted
+   below the fold (and 100vh is taller than the visible area on iOS). */
+.shell:has(> .chat-layout) {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+}
+
+.chat-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0.75rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.chat-meta .muted {
+  margin: 0.15rem 0 0.55rem;
+}
+
+.load-earlier {
+  display: flex;
+  justify-content: center;
+  padding: 0.35rem 0 0.75rem;
+}
+
+.nav-logout {
+  margin-left: 0.25rem;
+}
+
+.messages {
+  /* The message toolbar sizes itself to this list (the call's side panel is
+     narrow on a wide screen), not to the viewport. */
+  container: messages / inline-size;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 2.25rem 0.35rem 0.5rem;
+}
+
+.match-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1.25rem 0 1.65rem;
+}
+
+.match-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  text-align: left;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.match-mode:hover:not(:disabled) {
+  background: var(--surface-sunken);
+}
+
+.match-mode.active {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.match-mode strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.match-mode .muted {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.media-room {
+  width: min(1180px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: calc(100vh - 5rem);
+  padding: 0.35rem 1.25rem 1rem;
+}
+
+/* Keep Turnstile mounted for re-join tokens, but don't reserve vertical space. */
+.media-room > .turnstile-slot,
+.chat-layout > .turnstile-slot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.media-room-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.media-room-bar h1,
+.media-room-bar h2 {
+  margin-bottom: 0.1rem;
+  font-size: 1.35rem;
+}
+
+.media-room-bar .muted {
+  margin-bottom: 0.35rem;
+  font-size: 0.86rem;
+}
+
+.media-ttl {
+  opacity: 0.7;
+}
+
+.media-room-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.media-room-body.chat-open {
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+}
+
+.media-room-body.chat-closed {
+  grid-template-columns: 1fr;
+}
+
+/* The call area: near-black in Dusk (video reads best there; tokens.css gives
+   the stage its own dark tokens), a well pressed into the canvas in Mist. */
+.media-stage {
+  --line: rgb(238 234 242 / 0.12);
+  color: var(--ink);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(24rem, 68vh, 44rem);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--stage);
+}
+
+.media-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 0.65rem;
+  /* Leave clear air above the floating dock so tiles don't kiss the controls. */
+  padding: 0.75rem 0.75rem 7.25rem;
+  align-content: stretch;
+  background:
+    radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 50%),
+    var(--stage);
+}
+
+.media-grid.count-1 {
+  grid-template-columns: 1fr;
+}
+
+.media-grid.count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.media-grid.count-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.media-grid.count-6 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.media-grid.count-9 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.media-tile {
+  position: relative;
+  min-height: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--stage-raised);
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.media-tile.speaking {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.media-tile.is-muted {
+  opacity: 0.88;
+}
+
+.media-tile-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--stage);
+  display: block;
+}
+
+.media-tile-video.mirror {
+  transform: scaleX(-1);
+}
+
+.media-tile-video.is-off {
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.media-tile-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--stage-raised);
+}
+
+.media-tile-fallback.voice {
+  position: relative;
+  min-height: 11rem;
+  height: 100%;
+}
+
+.media-avatar-initial {
+  width: 4.75rem;
+  height: 4.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--stage-raised);
+  box-shadow: var(--shadow-stage-raised);
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  color: var(--ink);
+}
+
+.media-voice-orb {
+  position: relative;
+  width: 4.75rem;
+  height: 4.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--stage-raised);
+  box-shadow: var(--shadow-stage-raised);
+}
+
+.media-voice-orb.self {
+  box-shadow: var(--shadow-stage-raised), inset 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.media-voice-initial {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 600;
+}
+
+.media-voice-ring {
+  position: absolute;
+  inset: -0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  opacity: 0;
+}
+
+.media-tile.speaking .media-voice-ring {
+  animation: voice-pulse 1.6s ease-out infinite;
+}
+
+.media-tile.speaking .media-voice-ring.delay {
+  animation-delay: 0.55s;
+}
+
+.media-voice-orb.self.is-speaking .media-voice-ring,
+.media-tile-fallback.voice.preflight .media-voice-ring {
+  animation: voice-pulse 1.6s ease-out infinite;
+}
+
+.media-voice-orb.self.is-speaking .media-voice-ring.delay,
+.media-tile-fallback.voice.preflight .media-voice-ring.delay {
+  animation-delay: 0.55s;
+}
+
+@keyframes voice-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+.media-chip {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: calc(100% - 1rem);
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--stage) 62%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.media-chip.tile {
+  left: 0.55rem;
+  bottom: 0.65rem;
+}
+
+/* Other people's tiles have a volume slider along the bottom edge. */
+.media-chip.tile.above-volume {
+  bottom: 2.25rem;
+}
+
+.media-chip-quality {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+.media-peer-volume {
+  position: absolute;
+  z-index: 5;
+  left: 0.55rem;
+  right: 0.55rem;
+  bottom: 0.45rem;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.media-peer-volume input[type='range'] {
+  width: 100%;
+  height: 0.35rem;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* outline:none above hid the keyboard focus; show it on focus-visible. */
+.media-peer-volume input[type='range']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.media-peer-volume input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.media-peer-volume input[type='range']::-moz-range-thumb {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.media-chip-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-chip-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.media-chip-dot.muted {
+  background: var(--warning);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 20%, transparent);
+}
+
+.media-chip-dot.speaking {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  animation: chip-pulse 1.2s ease-out infinite;
+}
+
+@keyframes chip-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.75;
+  }
+}
+
+.media-waiting-hint {
+  position: absolute;
+  left: 50%;
+  top: var(--space-6);
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--stage) 65%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.media-stage-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 55%),
+    color-mix(in srgb, var(--stage) 52%, transparent);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.media-stage-overlay p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.media-toast-row {
+  position: absolute;
+  top: 0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: calc(100% - 12rem);
+  pointer-events: none;
+}
+
+.media-toast {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--stage) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ink-soft);
+  backdrop-filter: blur(8px);
+}
+
+/* Shown when the browser's autoplay policy blocked call audio. */
+.media-audio-unlock {
+  position: absolute;
+  left: 50%;
+  bottom: 5.5rem;
+  z-index: 6;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0.35rem 0.3rem 0.85rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.media-toast.warn {
+  border-color: color-mix(in srgb, var(--warning) 45%, transparent);
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+  color: var(--ink);
+}
+
+.media-dock-hint {
+  position: absolute;
+  bottom: calc(100% + 0.45rem);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--line);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.media-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 1.15rem;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--stage) 78%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.media-dock-btn {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.media-dock-btn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.media-dock-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.media-dock-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.media-dock-btn.is-off {
+  background: color-mix(in srgb, var(--warning) 22%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 45%, transparent);
+}
+
+.media-dock-btn.leave {
+  background: color-mix(in srgb, var(--accent) 88%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 95%, transparent);
+}
+
+.media-dock-btn.leave:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.media-stage-error {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 6.75rem;
+  margin: 0;
+  text-align: center;
+  z-index: 6;
+}
+
+.media-chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.media-chat .messages {
+  flex: 1;
+  min-height: 12rem;
+  max-height: none;
+  /* Room for the bubbles' shadows at the edges and above the composer. */
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+.media-chat .empty-state {
+  padding: 1rem 0.5rem;
+}
+
+.media-chat .composer,
+.media-chat .composer-context {
+  margin: 0;
+  padding: 0.55rem 0.65rem 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.media-chat .composer {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.media-chat .msg-row {
+  max-width: 92%;
+}
+
+.media-chat .error {
+  margin: 0.35rem 0.65rem 0;
+}
+
+@media (max-width: 900px) {
+  .media-room-body.chat-open {
+    grid-template-columns: 1fr;
+    /* Keep chat above the fold: shorter stage, chat gets remaining viewport. */
+    grid-template-rows: minmax(11rem, 34vh) minmax(16rem, 1fr);
+  }
+
+  .media-stage {
+    min-height: 11rem;
+  }
+
+  .media-chat {
+    min-height: 16rem;
+  }
+
+  .media-grid.count-6,
+  .media-grid.count-9 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .media-tile-fallback.voice {
+    min-height: 9.5rem;
+  }
+
+  .media-dock-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .media-grid.count-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(7.5rem, 1fr);
+  }
+
+  .media-grid.count-4,
+  .media-grid.count-6,
+  .media-grid.count-9 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .media-waiting-hint {
+    top: auto;
+    bottom: 4.75rem;
+  }
+
+  .media-stage-error {
+    bottom: 4.5rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .match-modes {
+    grid-template-columns: 1fr;
+  }
+}
+
+.msg-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  max-width: min(78%, 36rem);
+  min-width: 0;
+  margin-top: 0.7rem;
+  animation: rise 0.35s ease both;
+}
+
+.msg-row:first-child {
+  margin-top: 0;
+}
+
+.msg-row.stacked {
+  margin-top: 0.12rem;
+  gap: 0;
+  animation: none;
+}
+
+.msg-row.mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.msg-head {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0 0.2rem 0.05rem;
+}
+
+.msg-head .nick {
+  min-width: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  opacity: 0.72;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-row.mine .msg-head {
+  justify-content: flex-end;
+}
+
+.msg-main {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.msg-row.mine .msg-main {
+  flex-direction: row-reverse;
+}
+
+.msg-row:hover,
+.msg-row.menu-open {
+  z-index: 6;
+}
+
+.bubble {
+  position: relative;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.bubble.mine {
+  background: var(--accent-tint);
+  border-radius: 16px 16px 4px 16px;
+}
+
+/* Peer stack: flush left edge, radius only on outer corners */
+.msg-row.stack-start:not(.stack-end) .bubble {
+  border-radius: 16px 16px 16px 0;
+}
+
+.msg-row.stacked:not(.stack-end) .bubble {
+  border-radius: 0 16px 16px 0;
+}
+
+.msg-row.stacked.stack-end .bubble {
+  border-radius: 0 16px 16px 16px;
+}
+
+/* Mine stack: flush right edge, radius only on outer corners */
+.msg-row.mine.stack-start:not(.stack-end) .bubble {
+  border-radius: 16px 16px 0 16px;
+}
+
+.msg-row.mine.stacked:not(.stack-end) .bubble {
+  border-radius: 16px 0 0 16px;
+}
+
+.msg-row.mine.stacked.stack-end .bubble {
+  border-radius: 16px 0 16px 16px;
+}
+
+.bubble .body {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.bubble.deleted .body {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.reply-quote {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  border-left: 2px solid var(--accent);
+  padding-left: 0.55rem;
+  margin: 0 0 0.45rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  padding-bottom: 0.15rem;
+  max-width: 4.5rem;
+}
+
+.msg-row.mine .msg-meta {
+  align-items: flex-end;
+}
+
+.edited-mark {
+  font-size: 0.68rem;
+  font-style: italic;
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.read-mark {
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* accent-ink, the accent made for text: the plain accent is 4.4:1 on the Mist
+   canvas and 4.1:1 on its sunken wells, under the 4.5:1 small text needs. */
+.read-mark.seen {
+  color: var(--accent-ink);
+  opacity: 1;
+}
+
+.reaction-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.05rem;
+  max-width: 100%;
+  padding: 0 0.1rem;
+}
+
+.msg-row.mine .reaction-row {
+  justify-content: flex-end;
+}
+
+.reaction-chip {
+  border: 0;
+  background: var(--surface-sunken);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  min-height: 1.75rem;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .reaction-chip {
+    min-height: 44px;
+    padding: 0.35rem 0.7rem;
+  }
+}
+
+.reaction-chip.active {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.msg-actions {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 0.35rem);
+  z-index: 5;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.12rem;
+  padding: 0.2rem;
+  border-radius: 10px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-float);
+  width: max-content;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity 0.14s ease, visibility 0.14s ease;
+}
+
+/* Keep hover while crossing the gap between bubble and toolbar */
+.msg-actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.45rem;
+  left: -0.45rem;
+}
+
+.msg-row.mine .msg-actions {
+  left: auto;
+  right: calc(100% + 0.35rem);
+}
+
+.msg-row.mine .msg-actions::before {
+  left: auto;
+  right: -0.45rem;
+}
+
+@media (hover: hover) {
+  .msg-row:hover .msg-actions {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+/* Keyboard: a focused bubble (or a focused action) shows the toolbar. Only
+   :focus-visible, so a tap on a phone does not pin it open. */
+.msg-row:has(:focus-visible) .msg-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.bubble:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.msg-row.menu-open .msg-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* A wide message list opens the toolbar beside the bubble, so the pointer never
+   crosses a neighbouring message on its way to it; the bubble is capped so the
+   toolbar always fits beside it (no sideways scrollbar). */
+@container messages (min-width: 40.01rem) {
+  .msg-main {
+    max-width: calc(100cqw - 19.5rem);
+  }
+}
+
+/* A narrow list (a phone, or the side panel next to a call): the toolbar does
+   not fit beside the bubble, so it opens below (or above) it. It sizes itself
+   to the list (`messages` container), not to the viewport. */
+@container messages (max-width: 40rem) {
+  /* Default: open below the bubble so the first row doesn't cover the media stage. */
+  .msg-actions {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    transform: translateY(calc(100% + 0.28rem));
+    flex-wrap: nowrap;
+    max-width: calc(100cqw - 1rem);
+  }
+
+  /* One row: the buttons give up a little width rather than push the last
+     ones (delete, on your own messages) onto a second row; the side chat next
+     to a call is about 18rem wide. Touch screens wrap on purpose (below). */
+  .msg-action {
+    flex: 0 1 auto;
+    min-width: 1.5rem;
+  }
+
+  .msg-actions-sep {
+    display: none;
+  }
+
+  .msg-row.mine .msg-actions {
+    left: auto;
+    right: 0;
+  }
+
+  .msg-actions::before {
+    top: -0.35rem;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 0.35rem;
+  }
+
+  /* Stack-start rows keep below; non-start can flip above when space allows. */
+  .msg-row:not(.menu-below):not(.stack-start) .msg-actions {
+    top: 0;
+    bottom: auto;
+    transform: translateY(calc(-100% - 0.28rem));
+  }
+
+  .msg-row:not(.menu-below):not(.stack-start) .msg-actions::before {
+    top: auto;
+    bottom: -0.35rem;
+  }
+}
+
+
+.msg-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .msg-action {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Nine 44 px buttons in one row are wider than a phone: reactions on the
+     first row, reply / edit / delete on the second. */
+  .msg-actions {
+    flex-wrap: wrap;
+    max-width: min(calc(100vw - 2.5rem), 19rem);
+  }
+
+  .msg-actions-sep {
+    display: none;
+  }
+}
+
+.msg-action svg {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+}
+
+.msg-action:hover {
+  background: var(--surface-sunken);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.msg-action.danger {
+  color: var(--danger);
+}
+
+.msg-action.danger:hover {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+
+.msg-actions-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 0.2rem 0.15rem;
+  background: var(--line);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: color-mix(in srgb, var(--stage) 72%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.modal-card {
+  width: min(22rem, 100%);
+  padding: 1.25rem 1.25rem 1.1rem;
+  border-radius: 18px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-float);
+}
+
+.modal-card h3 {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.modal-card .muted {
+  margin: 0 0 1.15rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+
+.composer-context {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.composer {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.room-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.room-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.room-list .muted {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0.65rem 0.85rem;
+    align-items: flex-start;
+  }
+
+  .brand {
+    font-size: 1.2rem;
+    min-height: 44px;
+  }
+
+  .topbar nav {
+    gap: 0.15rem;
+    row-gap: 0.25rem;
+  }
+
+  .topbar nav > a {
+    padding: 0.35rem 0.45rem;
+    font-size: 0.9rem;
+  }
+
+  .topbar .nav-logout {
+    padding-inline: 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .hero {
+    align-items: end;
+    min-height: calc(100vh - 6.5rem);
+    padding: 1.75rem 1.1rem 2.25rem;
+  }
+
+  .msg-row {
+    max-width: 88%;
+  }
+
+  .msg-meta {
+    flex-direction: row;
+    align-items: center;
+    max-width: 100%;
+    gap: 0.4rem;
+  }
+}
+
+/* The Turnstile box is always shown where a page asks for it; the widget
+   sizes the slot itself, so nothing is reserved before it loads. */
+.turnstile-slot {
+  margin: 0;
+  min-height: 0;
+}
+
+.turnstile-slot[hidden] {
+  display: none;
+  margin: 0;
+  min-height: 0;
+}
+
+.join-gate .turnstile-slot {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  min-height: 0;
+  overflow: visible;
+  clip: auto;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.join-gate .join-gate-lead {
+  margin: 0 0 1.25rem;
+}
+
+.join-gate-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  max-width: 28rem;
+}
+
+.join-gate-form .cta-row {
+  margin-top: 0.35rem;
+}
+
+.join-gate .error {
+  margin: 0 0 1rem;
+}
+
+.topbar a.nav-active {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.status-overall {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  margin: 0 0 1.25rem;
+  min-height: 1.6em;
+}
+
+.status-overall.ok {
+  color: var(--online);
+}
+
+.status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-height: 4.25rem;
+}
+
+.status-item .muted {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+}
+
+.status-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.status-up .status-dot {
+  background: var(--online);
+}
+
+.status-down .status-dot {
+  background: var(--danger);
+}
+
+.status-checking .status-dot {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.status-off .status-dot {
+  background: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.invite-code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.btn-compact {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  min-height: 44px;
+}
+
+.empty-state {
+  margin: auto;
+  text-align: center;
+  padding: 2rem 1rem;
+  opacity: 0.9;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  padding: 0.35rem 0.25rem 0.15rem;
+}
+
+.typing-dots {
+  display: inline-flex;
+  gap: 0.22rem;
+  align-items: center;
+}
+
+.typing-dots i {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  animation: pulse 1s ease-in-out infinite;
+  display: block;
+}
+
+.typing-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus, motion, gap polish */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.btn:focus-visible,
+.match-mode:focus-visible,
+.media-dock-btn:focus-visible,
+.msg-action:focus-visible,
+.reaction-chip:focus-visible,
+.topbar a:focus-visible,
+.theme-toggle:focus-visible,
+.field input:focus-visible,
+.field select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Waiting in the queue, then the match moment: a raised card holding the
+   lattice loader and, once paired, the nickname as it decrypts. */
+.match-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: fit-content;
+  max-width: 100%;
+  margin: var(--space-8) 0 0;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised);
+  font: var(--t-ui);
+  color: var(--ink);
+}
+
+.match-reveal {
+  margin: 0;
+  font: var(--t-body);
+  color: var(--ink-soft);
+}
+
+.match-reveal strong {
+  display: block;
+  margin-top: var(--space-1);
+  font: var(--t-title-2);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.lobby-public-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 2rem 0 0.9rem;
+}
+
+.lobby-public-head h2 {
+  margin: 0;
+}
+
+.peer-left-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-sunken);
+}
+
+.peer-left-banner.soft {
+  background: var(--surface);
+}
+
+.peer-left-banner p {
+  margin: 0.2rem 0 0;
+}
+
+.who-here {
+  margin-top: 0.55rem;
+  font-size: 0.88rem;
+}
+
+.who-here summary {
+  cursor: pointer;
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.35rem 0;
+  list-style: none;
+}
+
+.who-here summary::-webkit-details-marker {
+  display: none;
+}
+
+/* inline-flex hides the native marker: draw the open/closed chevron. */
+.who-here summary::before {
+  content: '';
+  width: 0.38rem;
+  height: 0.38rem;
+  margin: 0 0.55rem 0 0.15rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.who-here[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.who-here ul {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+}
+
+.conn-toast {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  align-self: flex-start;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--warning) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+
+/* UX-M01: while media is live, chat WS blips stay quiet — no competing banner. */
+.conn-toast.soft {
+  position: static;
+  z-index: 1;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  background: transparent;
+  border-color: transparent;
+  color: color-mix(in srgb, var(--ink, #f5e6e0) 55%, transparent);
+  font-size: 0.75rem;
+  margin-bottom: 0;
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.media-room-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.media-preflight {
+  display: grid;
+  place-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  min-height: 18rem;
+  width: 100%;
+}
+
+.media-preflight-video {
+  width: min(100%, 22rem);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 1rem;
+  background: var(--stage);
+  border: 1px solid var(--line);
+}
+
+.media-preflight-copy {
+  text-align: center;
+  max-width: 28rem;
+}
+
+.media-preflight-copy p {
+  margin: 0 0 0.45rem;
+}
+
+.media-preflight-copy p.muted {
+  margin: 0 0 0.75rem;
+}
+
+.media-preflight-copy .cta-row {
+  justify-content: center;
+  margin-top: 0.85rem;
+  animation: none;
+}
+
+.media-tile-fallback.voice.preflight {
+  min-height: 10rem;
+  width: min(100%, 16rem);
+}
+
+.media-device-fields {
+  display: grid;
+  /* A long device name ends in an ellipsis instead of widening the fields. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.65rem;
+  margin: 0.85rem auto 0;
+  width: min(100%, 22rem);
+  text-align: left;
+}
+
+.media-device-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.media-device-field select {
+  border: 1px solid var(--line);
+  background: var(--surface-sunken);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  outline: none;
+  width: 100%;
+}
+
+.media-device-field select {
+  min-height: 44px;
+}
+
+.media-device-field select:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.media-device-field select:disabled {
+  opacity: 0.7;
+}
+
+.media-device-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 6.75rem;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(calc(100% - 1.5rem), 22rem);
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--stage) 78%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.media-device-panel .media-device-fields {
+  margin: 0;
+  width: 100%;
+}
+
+.media-dock-btn.is-active {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--ink);
+}
+
+@media (hover: none) {
+  .msg-row .msg-actions {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .msg-row.menu-open .msg-actions {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Monitoring (/monitoring): the cluster's public numbers ---- */
+.mon {
+  width: min(1180px, 100%);
+}
+
+.mon-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.mon-head .muted {
+  max-width: 46rem;
+}
+
+.mon-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.mon-pill.warn .status-dot {
+  background: var(--mode-voice);
+}
+
+.mon-pill.ok .status-dot {
+  background: var(--online);
+}
+
+.mon-pill.bad .status-dot {
+  background: var(--danger);
+}
+
+.mon-empty {
+  padding: 2rem 0;
+}
+
+.mon-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.mon-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem 0.9rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  min-height: 8.5rem;
+}
+
+.mon-tile-small {
+  min-height: 0;
+  padding: 0.85rem 1.1rem;
+}
+
+.mon-tile-label {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+
+.mon-tile-value {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.mon-tile-small .mon-tile-value {
+  font-size: 1.55rem;
+}
+
+.mon-spark {
+  display: block;
+  width: 100%;
+  height: 2.25rem;
+  margin-top: auto;
+  opacity: 0.85;
+}
+
+.mon-spark path {
+  stroke-width: 1.75px;
+  stroke-linejoin: round;
+}
+
+.mon-grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.mon-card {
+  padding: 1rem 1.1rem 0.85rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.mon-card > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.mon-card h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.15rem;
+}
+
+.mon-card > header .muted {
+  font-size: 0.84rem;
+}
+
+.mon-chart {
+  position: relative;
+  width: 100%;
+}
+
+.mon-chart svg {
+  display: block;
+  overflow: visible;
+}
+
+.mon-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.mon-axis {
+  fill: var(--ink-soft);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.mon-line {
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.mon-cursor {
+  stroke: var(--ink-soft);
+  stroke-dasharray: 3 3;
+  opacity: 0.6;
+}
+
+.mon-tip {
+  position: absolute;
+  top: 0;
+  min-width: 140px;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-float);
+  font-size: 0.8rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mon-tip-time {
+  color: var(--ink-soft);
+  margin-bottom: 0.2rem;
+}
+
+.mon-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Many series: two columns, so the box stays short and leaves the plot readable. */
+.mon-tip.two-col .mon-tip-rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  column-gap: 1rem;
+}
+
+.mon-chart svg {
+  touch-action: pan-y;
+}
+
+.mon-tip-row strong {
+  margin-left: auto;
+  padding-left: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.mon-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.mon-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mon-swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.22rem;
+  border-radius: 2px;
+}
+
+.mon-modes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.mon-modes li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.mon-mode-name {
+  text-transform: capitalize;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+.mon-modes strong {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+
+.mon-services {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mon-services .status-item {
+  min-height: 0;
+  padding: 0.7rem 0.85rem;
+}
+
+.mon-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+  padding: 0.3rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.mon-tabs a {
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mon-tabs a:hover {
+  color: var(--ink);
+}
+
+.mon-tabs a.active {
+  background: var(--surface-sunken);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.mon-tabs a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.mon-tiles-six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.mon-grid1 {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.mon-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.mon-nodata {
+  padding: 3.5rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.mon-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem 1.5rem;
+}
+
+.mon-bars li {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr) 3.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.mon-bar-name {
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mon-bar-track {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.mon-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--online);
+}
+
+.mon-bar-fill.mon-bar-short {
+  background: var(--mode-voice);
+}
+
+.mon-bars strong {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1100px) {
+  .mon-tiles-six {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .mon-tiles,
+  .mon-tiles-six {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mon-grid2,
+  .mon-grid3,
+  .mon-bars {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mon-tabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  /* The row scrolls sideways: fade the edge that has more tabs behind it. */
+  .mon-tabs.more-right {
+    mask-image: linear-gradient(to right, #000 82%, transparent);
+  }
+
+  .mon-tabs.more-left {
+    mask-image: linear-gradient(to left, #000 82%, transparent);
+  }
+
+  .mon-tabs.more-left.more-right {
+    mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+  }
+
+  .mon-tabs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mon-tile:not(.mon-tile-small) {
+    min-height: 7.5rem;
+  }
+
+  .mon-tile {
+    padding: 0.85rem 0.9rem 0.75rem;
+  }
+
+  .mon-tile-label {
+    font-size: 0.8rem;
+  }
+}
+
+/* ==== Hush: one soft material. Raised = you can act on it, sunken = it holds
+   something. Colors, shadows, radii and timings all come from tokens.css. ==== */
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent-tint);
+  color: var(--ink);
+}
+
+/* ---- Shell ---- */
+.topbar {
+  padding: var(--space-4) var(--space-6);
+  gap: var(--space-4);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  gap: var(--space-2);
+}
+
+.topbar nav > a {
+  opacity: 1;
+  color: var(--ink-soft);
+  font: var(--t-ui);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.95rem;
+  transition: color var(--dur-fast) var(--ease-soft), box-shadow var(--dur-fast) var(--ease-soft);
+}
+
+.topbar nav > a:hover {
+  color: var(--ink);
+}
+
+.topbar a.nav-active,
+.topbar a.nav-active:hover {
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-inset-sm);
+}
+
+.theme-toggle {
+  border: 0;
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised-sm);
+  transition: box-shadow var(--dur-fast) var(--ease-soft), transform var(--dur-fast) var(--ease-soft);
+}
+
+.theme-toggle:hover {
+  background: var(--canvas);
+  transform: translateY(-2px);
+}
+
+.theme-toggle:active {
+  box-shadow: var(--shadow-inset-sm);
+}
+
+.btn-compact {
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+}
+
+/* ---- Type ---- */
+.panel h1,
+.panel h2,
+.mon-card h2,
+.status-overall,
+.match-mode strong,
+.modal-card h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.panel h1 {
+  font: var(--t-title-1);
+  letter-spacing: var(--t-title-1-tracking, -0.02em);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  text-wrap: balance;
+  margin-bottom: var(--space-2);
+}
+
+.panel h2 {
+  font: var(--t-title-2);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  margin-bottom: var(--space-2);
+}
+
+.muted {
+  color: var(--ink-soft);
+  opacity: 1;
+}
+
+.invite-code,
+.mon-tile-value,
+.media-ttl {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Fields: wells with a 1.5px underline so they read without the shadow ---- */
+.field label {
+  font: var(--t-label);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.field input,
+.field select,
+.media-device-field select {
+  border: 0;
+  border-bottom: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+  color: var(--ink);
+  font: var(--t-ui);
+  font-size: 1rem;
+  padding: 0.8rem 1rem;
+  min-height: 48px;
+  outline: none;
+  transition: box-shadow var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+}
+
+.field input::placeholder {
+  color: var(--ink-faint);
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.media-device-field select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--accent);
+  box-shadow: var(--shadow-inset-sm), var(--shadow-focus);
+}
+
+/* ---- Raised cards and rows ---- */
+.match-mode,
+.room-list li,
+.mon-card,
+.mon-tile,
+.peer-left-banner {
+  border: 0;
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised);
+  border-radius: var(--radius-lg);
+}
+
+.status-item,
+.mon-pill {
+  border: 0;
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised-sm);
+}
+
+.status-item {
+  border-radius: var(--radius-md);
+}
+
+.match-mode {
+  padding: var(--space-5) var(--space-5);
+  gap: var(--space-2);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-soft),
+    background var(--dur-fast) var(--ease-soft),
+    transform var(--dur-fast) var(--ease-soft);
+}
+
+.match-mode:hover:not(:disabled) {
+  background: var(--canvas);
+  transform: translateY(-2px);
+}
+
+.match-mode.active,
+.match-mode.active:hover:not(:disabled) {
+  background: var(--accent-tint);
+  box-shadow: var(--shadow-inset);
+  transform: none;
+}
+
+.match-mode.active strong {
+  color: var(--accent-ink);
+}
+
+.match-mode strong {
+  font-size: 1.1rem;
+}
+
+.room-list {
+  gap: var(--space-4);
+}
+
+.room-list li {
+  padding: var(--space-4) var(--space-5);
+}
+
+/* ---- Overlays float instead of being pressed from the canvas ---- */
+.modal-backdrop {
+  background: color-mix(in srgb, var(--canvas) 60%, transparent);
+  backdrop-filter: blur(10px);
+  z-index: var(--z-modal);
+}
+
+.modal-card,
+.msg-actions,
+.mon-tip {
+  border: 0;
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-float);
+}
+
+.modal-card {
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+
+.msg-actions {
+  border-radius: var(--radius-pill);
+  padding: var(--space-1);
+}
+
+.msg-action {
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--ink-soft);
+}
+
+.msg-action:hover {
+  border-color: transparent;
+  background: var(--surface-sunken);
+  color: var(--ink);
+}
+
+.mon-tip {
+  border-radius: var(--radius-sm);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--canvas);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger);
+}
+
+/* ---- Chat ---- */
+.bubble {
+  border: 0;
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised-sm);
+  font: var(--t-message);
+}
+
+.bubble.mine {
+  background: var(--accent-tint);
+}
+
+.msg-head .nick {
+  font: var(--t-label);
+  font-weight: 600;
+  color: var(--ink-soft);
+  opacity: 1;
+}
+
+.reply-quote {
+  border-left: 0;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+  border-radius: var(--radius-xs);
+  padding: var(--space-1) var(--space-2);
+  color: var(--ink-soft);
+  opacity: 1;
+}
+
+.reaction-chip {
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised-sm);
+  min-height: 28px;
+  padding: 0.1rem 0.55rem;
+  transition: box-shadow var(--dur-fast) var(--ease-spring), transform var(--dur-fast) var(--ease-spring);
+}
+
+.reaction-chip:active {
+  transform: scale(0.94);
+}
+
+.reaction-chip.active {
+  background: var(--accent-tint);
+  box-shadow: var(--shadow-inset-sm);
+  color: var(--accent-ink);
+}
+
+.composer {
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised);
+  align-items: center;
+}
+
+/* The message box (React Bits Prompt Bar): a well like the fields, with the
+   send button inside it, flat while the box is empty and a raised accent knob
+   once there is something to send. */
+.composer-bar .prompt-bar__field {
+  border-bottom: 1.5px solid var(--line-strong);
+  box-shadow: var(--shadow-inset-sm);
+  transition: box-shadow var(--dur-fast) var(--ease-soft), border-color var(--dur-fast) var(--ease-soft);
+}
+
+.composer-bar .prompt-bar__field:has(.prompt-bar__input:focus-visible) {
+  border-bottom-color: var(--accent);
+  box-shadow: var(--shadow-inset-sm), var(--shadow-focus);
+}
+
+.composer-bar .prompt-bar__input {
+  font: var(--t-ui);
+  font-size: 1rem;
+  line-height: 22px;
+}
+
+.composer-bar .prompt-bar__input::placeholder {
+  color: var(--ink-faint);
+}
+
+/* The well shows the focus, not the text inside it. */
+.composer-bar .prompt-bar__input:focus-visible {
+  outline: none;
+}
+
+.composer-bar .prompt-bar__send {
+  background: transparent;
+  color: var(--ink-faint);
+}
+
+.composer-bar .prompt-bar__send[data-armed] {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-raised-sm);
+}
+
+.composer-bar .prompt-bar__send:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.composer-context {
+  border: 0;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+}
+
+.typing-dots i {
+  background: var(--accent);
+}
+
+.conn-toast {
+  border: 0;
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-float);
+  color: var(--warning);
+  font-weight: 600;
+}
+
+
+/* ---- Monitoring ---- */
+.mon-tabs {
+  border: 0;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1);
+}
+
+.mon-tabs a {
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+}
+
+.mon-tabs a.active {
+  background: var(--canvas);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-raised-sm);
+}
+
+/* ---- Call: tiles and dock are raised from the stage's own material (dark in
+   Dusk, the canvas in Mist) ---- */
+.media-tile {
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--stage-raised);
+  box-shadow: var(--shadow-stage-raised);
+}
+
+.media-tile.speaking {
+  box-shadow: var(--shadow-glow);
+}
+
+.media-dock {
+  border: 0;
+  background: color-mix(in srgb, var(--stage-raised) 88%, transparent);
+  box-shadow: var(--shadow-stage-raised);
+}
+
+.media-dock-btn {
+  border: 0;
+  background: var(--stage-raised);
+  box-shadow: var(--shadow-stage-raised);
+  color: var(--stage-ink);
+}
+
+.media-dock-btn:hover:not(:disabled) {
+  background: var(--stage-raised);
+  box-shadow: var(--shadow-stage-raised), 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.media-dock-btn.is-off {
+  box-shadow: var(--shadow-stage-inset);
+}
+
+.media-dock-btn.leave,
+.media-dock-btn.leave:hover:not(:disabled) {
+  background: var(--danger);
+  color: var(--canvas);
+}
+
+.media-chat {
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised);
+}
+
+.btn-primary:disabled {
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+}
+
+.hero-scramble {
+  color: var(--accent);
+}
+
+/* Mode marks: a dot in the mode's color before the card title and room name. */
+[data-mode] {
+  --mode-color: var(--mode-text);
+}
+
+[data-mode='voice'] {
+  --mode-color: var(--mode-voice);
+}
+
+[data-mode='video'] {
+  --mode-color: var(--mode-video);
+}
+
+.match-mode strong::before,
+.room-list li[data-mode] strong::before {
+  content: '';
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-right: 0.5em;
+  border-radius: 50%;
+  background: var(--mode-color);
+  vertical-align: 0.12em;
+}
+
+/* ---- Room for the shadows: raised things need space around them or their
+   shadows run into each other (space-6 between cards, space-3 between bubbles
+   and chips at the least). ---- */
+.messages {
+  overflow-x: hidden;
+  padding: var(--space-8) var(--space-4) var(--space-4);
+}
+
+.msg-row {
+  margin-top: var(--space-6);
+  gap: var(--space-2);
+}
+
+.msg-row:first-child {
+  margin-top: 0;
+}
+
+.msg-row.stacked {
+  margin-top: var(--space-3);
+}
+
+.reaction-row {
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-1);
+}
+
+.match-modes {
+  gap: var(--space-6);
+  margin: var(--space-6) 0 var(--space-8);
+}
+
+.grid-actions {
+  gap: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.cta-row {
+  gap: var(--space-6);
+}
+
+.room-list {
+  gap: var(--space-5);
+  padding: var(--space-1) 0 var(--space-6);
+}
+
+.lobby-public-head {
+  margin: var(--space-10) 0 var(--space-5);
+}
+
+.status-list {
+  gap: var(--space-4);
+}
+
+.mon-tiles,
+.mon-grid1,
+.mon-grid2,
+.mon-grid3 {
+  gap: var(--space-6);
+}
+
+.mon-tiles {
+  margin-bottom: var(--space-6);
+}
+
+.mon-grid1,
+.mon-grid2,
+.mon-grid3 {
+  margin-top: var(--space-6);
+}
+
+.chat-meta,
+.media-room-bar-actions,
+.invite-row,
+.modal-actions {
+  gap: var(--space-4);
+}
+
+.chat-layout {
+  gap: var(--space-5);
+}
+
+.topbar nav {
+  gap: var(--space-3);
+}
+
+.composer-context {
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+}
+
+.media-grid {
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) 7.25rem;
+}
+
+/* ---- Phones: brand, End session and the theme switch on the first row, the
+   four links as one row of pills under them. ---- */
+@media (max-width: 640px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    row-gap: var(--space-3);
+    column-gap: var(--space-2);
+    padding: var(--space-4);
+  }
+
+  .topbar .brand {
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+
+  .topbar nav {
+    display: contents;
+  }
+
+  .topbar nav > a {
+    grid-row: 2;
+    padding: 0.45rem 0.25rem;
+  }
+
+  .topbar .nav-logout {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    white-space: nowrap;
+  }
+
+  .topbar .theme-toggle,
+  .topbar .theme-switch {
+    grid-column: 4;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .hero {
+    align-items: end;
+    min-height: calc(100svh - 8.5rem);
+    padding: var(--space-6) var(--space-4) var(--space-10);
+  }
+
+  .hero::before {
+    inset: 3% 4% auto auto;
+    width: min(52vw, 220px);
+  }
+
+  .hero::after {
+    right: calc(4% + min(52vw, 220px) * 0.32);
+    top: calc(3% + min(52vw, 220px) * 0.32);
+    width: min(18vw, 74px);
+  }
+}
+
+.mon-tabs {
+  margin-bottom: var(--space-8);
+}
+
+.topbar nav {
+  gap: var(--space-6);
+}
+
+.media-room-bar-actions,
+.chat-meta {
+  gap: var(--space-6);
+}
+
+.room-list {
+  gap: var(--space-6);
+}
+
+/* Phones: before joining, the stage grows to fit the preflight (preview, copy,
+   Join and Leave); the short call-time stage cut the buttons off. */
+@media (max-width: 900px) {
+  .media-room-body.chat-open:has(.media-preflight) {
+    grid-template-rows: auto minmax(16rem, 1fr);
+  }
+
+  .media-preflight {
+    min-height: 0;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .media-tile-fallback.voice.preflight {
+    min-height: 7rem;
+  }
+}
+
+/* Phones: room for the shadows between the header rows and under fields. */
+@media (max-width: 640px) {
+  .topbar {
+    row-gap: var(--space-6);
+  }
+
+  .grid-actions {
+    row-gap: var(--space-6);
+  }
+}
+
+/* ---- Call tiles: the contents fit whatever height the grid gives a tile ---- */
+.media-chip {
+  font: var(--t-caption);
+}
+
+.media-tile {
+  container-type: size;
+}
+
+/* In a call the voice face fills its tile; the fixed minimum only suits the
+   preflight preview (it pushed the orb down and out of short tiles). */
+.media-tile .media-tile-fallback.voice {
+  min-height: 0;
+}
+
+/* The initial is centred in the space above the name chip and the volume
+   slider (bottom 4.25rem), and sized to that space. */
+.media-tile .media-tile-fallback {
+  padding-bottom: 4.25rem;
+}
+
+.media-tile .media-voice-orb,
+.media-tile .media-avatar-initial {
+  width: min(4.75rem, calc(100cqh - 5.75rem));
+  height: min(4.75rem, calc(100cqh - 5.75rem));
+}
+
+.media-tile .media-voice-initial,
+.media-tile .media-avatar-initial {
+  font-size: min(1.65rem, calc((100cqh - 5.75rem) * 0.4));
+}
+
+/* Phones: tiles keep a usable height; when a crowded call does not fit, the
+   grid scrolls inside the stage instead of squeezing tiles into strips. */
+@media (max-width: 900px) {
+  .media-grid {
+    gap: var(--space-3);
+    padding: var(--space-3);
+    grid-auto-rows: minmax(4.5rem, 1fr);
+    overflow-y: auto;
+  }
+
+  /* The dock sits in its own row under the tiles instead of floating over
+     them, so a scrolled grid never hides a name or a volume slider. */
+  .media-dock {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    align-self: center;
+    margin: 0 0 var(--space-3);
+  }
+
+  /* Above the dock row (2.75rem buttons, padding, margin). */
+  .media-stage-error {
+    bottom: 5.5rem;
+  }
+}
+
+/* A short tile has no room for the big initial: the name chip says who it is,
+   and the tile's glow shows who is speaking. */
+@container (max-height: 8rem) {
+  .media-voice-orb,
+  .media-avatar-initial {
+    display: none;
+  }
+}
+
+/* ---- Scrollbars: thin pills in the line tones, on a clear track ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* Safari (and older Chromium) read only these. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-faint);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---- A message reaching its time: the bubble shreds (ui/shred.ts) while the
+   rest of the row fades and stops taking clicks. ---- */
+.msg-row.shredding {
+  pointer-events: none;
+}
+
+.msg-row.shredding .msg-head,
+.msg-row.shredding .msg-meta,
+.msg-row.shredding .reaction-row,
+.msg-row.shredding .msg-actions {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-exit);
+}
+
+.msg-row.shredding .msg-main {
+  overflow: visible;
+}
+
+/* ---- The invite ticket in a private room that is still waiting ---- */
+.invite-ticket {
+  width: min(420px, 100%);
+  margin: 0 auto var(--space-6);
+}
+
+.invite-ticket-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-5) var(--space-6);
+  text-align: left;
+}
+
+.invite-ticket-label {
+  font: var(--t-label);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.invite-ticket-code {
+  font: var(--t-code);
+  letter-spacing: var(--t-code-tracking, 0.14em);
+  color: var(--ink);
+}
+
+.invite-ticket-hint {
+  font: var(--t-caption);
+  color: var(--accent-ink);
+}
+
+.invite-ticket-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 100%;
+  font: var(--t-label);
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+.invite-ticket-stub svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---- Hold to leave (ui/reactbits/HoldButton): a raised button whose danger
+   fill rises while it is held ---- */
+.hold-button.hold-leave {
+  --hb-shadow: var(--shadow-raised);
+  font: var(--t-ui);
+  font-weight: 600;
+  min-height: 44px;
+  transition:
+    transform var(--dur-fast) var(--ease-soft),
+    box-shadow var(--dur-fast) var(--ease-soft);
+}
+
+.hold-button.hold-leave:not(:disabled):hover {
+  background: var(--canvas);
+  transform: translateY(-2px);
+}
+
+.hold-button.hold-leave[data-phase='holding'] {
+  box-shadow: var(--shadow-inset-sm);
+}
+
+/* ---- Per-person volume: the wake slider (bars that rise behind the handle)
+   along the tile's bottom edge; the native range is the loading fallback ---- */
+.media-peer-volume {
+  bottom: 0.25rem;
+}
+
+.media-peer-volume .wake-slider {
+  width: 100%;
+}
+
+/* On a tile the hit area is 28px (the slider's own minimum is 44px, which
+   reached up over the name chip), so chip and slider never overlap. */
+.media-peer-volume .wake-slider__track {
+  min-height: 28px;
+}
+
+.media-peer-volume-native {
+  display: flex;
+  width: 100%;
+}
+
+/* The message list sits in a frame so the top-edge blur stays put while the
+   list scrolls under it. */
+.messages-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-frame > .messages {
+  flex: 1;
+  min-height: 0;
+}
+
+/* The top-edge blur shows only once the list has scrolled from its top. */
+.messages-frame > .gradual-blur {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-soft);
+}
+
+.messages-frame[data-scrolled] > .gradual-blur {
+  opacity: 1;
+}
+
+/* ---- Wave 3 pieces in the Hush material ---- */
+
+/* Invite code slots: twelve small wells in the code type. */
+.invite-slots {
+  --cs-height: 44px;
+  --cs-font: 17px;
+  font-family: var(--font-mono);
+}
+
+.invite-slots .code-slots__slot {
+  box-shadow: var(--shadow-inset-sm);
+}
+
+/* The heart reaction: a raised pill the size of the other reaction chips. */
+.reaction-heart .pulse-heart__pill {
+  min-height: 28px;
+  box-shadow: var(--shadow-raised-sm);
+  font: var(--t-caption);
+  font-weight: 600;
+}
+
+.reaction-heart[data-liked='true'] .pulse-heart__pill {
+  background: var(--accent-tint);
+  box-shadow: var(--shadow-inset-sm);
+}
+
+/* The theme switch: a sunken track with the sun and moon in it, a raised thumb. */
+.theme-switch .squish-switch__track {
+  box-shadow: var(--shadow-inset-sm);
+}
+
+.theme-switch .squish-switch__thumb {
+  box-shadow: var(--shadow-raised-sm);
+  z-index: 1;
+}
+
+.theme-switch-icons {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.theme-switch-icons svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* A status check's mark sits where the dot was. */
+.status-mark {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The landing headline waits (hidden, keeping its space) for its decrypt effect,
+   at most 0.7 s; then it shows as plain text. */
+.hero-wait {
+  visibility: hidden;
+  animation: hero-wait-show 0s linear 0.7s forwards;
+}
+
+@keyframes hero-wait-show {
+  to {
+    visibility: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-wait {
+    visibility: visible;
+    animation: none;
+  }
+}
+
+/* The theme switch before its squish version loads: the same size, still. */
+.theme-switch-still {
+  position: relative;
+  width: 58px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+  cursor: pointer;
+}
+
+.theme-switch-still-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised-sm);
+  z-index: 1;
+}
+
+.theme-switch-still[aria-checked='true'] .theme-switch-still-thumb {
+  left: auto;
+  right: 3px;
+}
+
+/* ---- On wide screens a call room fills the screen like a text room: the
+   stage and the chat panel share the height, and the chat list scrolls inside
+   its panel (before, the room only had a minimum height, so a long chat grew
+   the page and new messages landed below the fold). ---- */
+.media-chat .messages {
+  min-height: 0;
+}
+
+@media (min-width: 901px) {
+  .shell:has(> .media-room) {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+  }
+
+  .media-room {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .media-room-body {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .media-stage {
+    min-height: 0;
+  }
+}
+
+/* Phones: the header and room bar take too much height to fit the room on
+   one screen, so the page still scrolls once, but the chat has a fixed
+   height and no longer grows the page with every message. */
+@media (max-width: 900px) {
+  .media-room-body.chat-open {
+    grid-template-rows: minmax(11rem, 34vh) min(28rem, 70dvh);
+  }
+
+  .media-room-body.chat-open:has(.media-preflight) {
+    grid-template-rows: auto min(28rem, 70dvh);
+  }
+}
+
+/* "New messages" when the reader is scrolled up and more arrive: a floating
+   pill over the list's bottom edge. */
+.jump-latest {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-3);
+  transform: translateX(-50%);
+  z-index: 7;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0.4rem 0.95rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-float);
+  color: var(--accent-ink);
+  font: var(--t-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.jump-latest svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---- Landing glow (React Bits Grainient): a slow amber gradient. A still
+   gradient shows until the effect loads (and where WebGL 2 is missing). ---- */
+.hero:has(.hero-glow)::before,
+.hero:has(.hero-glow)::after {
+  display: none;
+}
+
+.hero-glow {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* A lens set into the canvas: a raised bezel of canvas material round it
+   (lit from the top left like every Hush surface), and the lens sunk inside
+   it with a pressed edge. */
+.hero-glow.is-orb {
+  --orb: min(44vw, 480px);
+  inset: 10% 6% auto auto;
+  width: var(--orb);
+  aspect-ratio: 1;
+  padding: calc(var(--orb) * 0.03);
+  border-radius: 50%;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--canvas) 94%, #fff),
+    color-mix(in srgb, var(--canvas) 96%, #000)
+  );
+  box-shadow: var(--shadow-raised-lg);
+  animation: hush-float var(--dur-ambient) var(--ease-soft) infinite alternate;
+}
+
+.lens-well {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 62% 38%, #F8D9B5, #F0A35E 35%, #A3520F 78%);
+}
+
+[data-theme='light'] .lens-well {
+  background: radial-gradient(circle at 62% 38%, #FFFFFF, #F8DCC0 30%, #EDB98A 62%, #D99A66);
+}
+
+.lens-well::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-inset);
+  pointer-events: none;
+}
+
+/* The whole background, faint, fading into the canvas before the words
+   (bottom left). Bright amber on the near-black Dusk canvas reads far
+   stronger than the pale Mist version, so Dusk shows less of it. */
+.hero-glow.is-wash {
+  inset: 0;
+  opacity: 0.22;
+  /* Fades out towards the words and into the header (no hard top edge). */
+  -webkit-mask-image:
+    radial-gradient(ellipse 80% 90% at 80% 20%, #000 25%, transparent 72%),
+    linear-gradient(to bottom, transparent, #000 7rem);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(ellipse 80% 90% at 80% 20%, #000 25%, transparent 72%),
+    linear-gradient(to bottom, transparent, #000 7rem);
+  mask-composite: intersect;
+}
+
+[data-theme='light'] .hero-glow.is-wash {
+  opacity: 0.45;
+}
+
+@media (max-width: 640px) {
+  .hero-glow.is-orb {
+    --orb: min(52vw, 220px);
+    inset: 3% 4% auto auto;
+  }
+
+  /* Phones keep the lens only (one moving canvas instead of two). */
+  .hero-glow.is-wash {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow.is-orb {
+    animation: none;
+  }
+}
+
+/* ---- Lens clock: a quick picture of a message's life in the lens, made of
+   the page's material: marks, hands and knob are canvas-coloured and raised
+   by the same light (top left) as every other Hush surface. Each round
+   (--round) the long hand goes round once and wipes the marks it passes.
+   Order: gradient, marks, the face (light trail, hands, knob); the lens's
+   pressed edge stays on top. ---- */
+.lens-timer,
+.lens-marks,
+.lens-face,
+.lens-hands {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lens-timer {
+  /* Raised pieces: a light edge up-left, a soft shadow down-right. The filter
+     sits on groups that do not turn, so the light stays put as hands rotate. */
+  --lens-raise: drop-shadow(-1px -1px 1.2px rgb(255 255 255 / 0.16))
+    drop-shadow(1.6px 2px 2.4px rgb(0 0 0 / 0.55));
+}
+
+[data-theme='light'] .lens-timer {
+  --lens-raise: drop-shadow(-1.2px -1.2px 1.4px rgb(255 255 255 / 0.95))
+    drop-shadow(1.6px 2px 2.6px rgb(122 82 50 / 0.42));
+}
+
+.lens-marks,
+.lens-hands {
+  overflow: visible;
+  filter: var(--lens-raise);
+}
+
+/* Marks come back one after another at the start of a round, and sink into
+   the lens when the long hand reaches them. */
+.lens-mark {
+  fill: var(--canvas);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    lens-mark-in 0.5s var(--ease-soft) calc(var(--i) * 60ms) both,
+    lens-mark-out 0.3s var(--ease-soft) var(--at) forwards;
+}
+
+@keyframes lens-mark-in {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+@keyframes lens-mark-out {
+  to {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+.lens-face {
+  animation: lens-face-in 0.6s var(--ease-soft) both;
+}
+
+/* Frozen at the end of a round (hands pinned inline) before it is cut into
+   strips: the strips are copies and must not start the animations again. */
+.lens-face.is-still,
+.lens-face.is-still * {
+  animation: none !important;
+}
+
+/* The trail is light, not material: it goes out instead of falling in strips. */
+.lens-face.is-still .lens-sweep {
+  display: none;
+}
+
+@keyframes lens-face-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+.lens-hand {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+
+.lens-hand.is-long,
+.lens-sweep {
+  animation: lens-turn var(--round) linear both;
+}
+
+/* The short hand starts at a random hour each round (--from) and moves on a
+   sixth of a turn while the long hand goes round. */
+.lens-hand.is-short {
+  animation: lens-short var(--round) linear both;
+}
+
+@keyframes lens-short {
+  from {
+    transform: rotate(var(--from));
+  }
+  to {
+    transform: rotate(calc(var(--from) + 60deg));
+  }
+}
+
+@keyframes lens-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* A soft trail behind the long hand, out to the very edge of the lens: a
+   dark brown shade on Dusk, a light on Mist. */
+.lens-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -90deg,
+    transparent 0deg,
+    color-mix(in srgb, #7a3e0c 40%, transparent) 90deg,
+    transparent 90.5deg
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent 12%, #000 34%);
+  mask-image: radial-gradient(circle, transparent 12%, #000 34%);
+}
+
+[data-theme='light'] .lens-sweep {
+  background: conic-gradient(from -90deg, transparent 0deg, rgb(255 255 255 / 0.6) 90deg, transparent 90.5deg);
+}
+
+.lens-hand line {
+  stroke: var(--canvas);
+  stroke-linecap: round;
+}
+
+.lens-hand.is-short line {
+  stroke-width: 3.4;
+}
+
+.lens-hand.is-long line {
+  stroke-width: 1.3;
+}
+
+.lens-knob {
+  fill: var(--canvas);
+}
+
+.lens-knob-core {
+  fill: var(--accent);
+}
+
+/* Still: a plain clock face, nothing turns or wipes. */
+@media (prefers-reduced-motion: reduce) {
+  .lens-mark,
+  .lens-face,
+  .lens-hand.is-long,
+  .lens-sweep {
+    animation: none;
+  }
+
+  .lens-hand.is-short {
+    animation: none;
+    transform: rotate(var(--from));
+  }
+
+  .lens-sweep {
+    display: none;
+  }
+}
+
+/* ---- Device pickers (React Bits Glide Select): the trigger is a well like
+   every other field, the menu floats above the stage. ---- */
+.media-device-glide.glide-select {
+  display: block;
+  width: 100%;
+}
+
+.media-device-glide .glide-select__trigger {
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+  min-height: 48px;
+  padding: 0.8rem 0.9rem 0.8rem 1rem;
+  border-bottom: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+  font: var(--t-ui);
+  font-size: 1rem;
+}
+
+.media-device-glide .glide-select__trigger:not(:disabled):hover,
+.media-device-glide .glide-select__trigger[aria-expanded='true'] {
+  background: var(--surface-sunken);
+}
+
+.media-device-glide .glide-select__trigger:focus-visible {
+  border-bottom-color: var(--accent);
+  box-shadow: var(--shadow-inset-sm), var(--shadow-focus);
+}
+
+.media-device-glide .glide-select__label {
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.media-device-glide .glide-select__menu {
+  width: 100%;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-float);
+}
+
+.media-device-glide .glide-select__option {
+  font: var(--t-ui);
+  font-size: 0.95rem;
+}
+
+/* Long device names end in an ellipsis instead of widening the list. */
+.media-device-glide .glide-select__list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---- Mist call stage: a well pressed into the canvas, tiles and the dock
+   raised from it like every other Hush surface. ---- */
+[data-theme='light'] .media-stage {
+  --line: color-mix(in srgb, var(--ink) 14%, transparent);
+  box-shadow: var(--shadow-inset);
+}
+
+[data-theme='light'] .media-dock-btn:hover:not(:disabled) {
+  box-shadow: var(--shadow-stage-raised), 0 0 0 1px var(--line);
+}
+
+/* ---- End session (React Bits Slide Commit): a well with a grip to slide to
+   the end. The grip is clipped as it moves, so its raised edge is drawn inside
+   it; keyboard focus rings the whole well. ---- */
+.end-slide.slide-commit {
+  margin-left: 0.25rem;
+}
+
+.end-slide .slide-commit__track {
+  box-shadow: var(--shadow-inset-sm);
+}
+
+.end-slide:has(.slide-commit__capsule:focus-visible) .slide-commit__track {
+  box-shadow: var(--shadow-inset-sm), var(--shadow-focus);
+}
+
+.end-slide .slide-commit__capsule,
+.end-slide .slide-commit__capsule:focus-visible {
+  box-shadow:
+    inset 1px 1px 0 var(--shadow-light),
+    inset -1px -1px 2px color-mix(in srgb, var(--shadow-dark) 55%, transparent);
+}
+
+/* The words sit in the space right of the grip (grip = 40 − 2 × 4 px). */
+.end-slide .slide-commit__label {
+  padding-left: 36px;
+  font: var(--t-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.end-slide .slide-commit__text--plain {
+  color: var(--ink-soft);
+}
+
+/* Phones: between the brand and the theme switch there is about 100px, so the
+   slide starts at column 3 and may run into column 4's free space. */
+@media (max-width: 640px) {
+  .topbar .end-slide.slide-commit {
+    grid-column: 3 / 5;
+    grid-row: 1;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  .end-slide .slide-commit__label {
+    font-size: 0.8rem;
+  }
+}
+
+/* ---- Your microphone in the dock (React Bits Voice Pill): the dock button
+   itself widens to the left into live level bars while you speak, and back
+   when you stop. Its right edge (the microphone) stays put: the growth is
+   taken back by a negative left margin, so the dock neither re-centres nor
+   moves. The piece's own capsule is not used: the raised button is the pill. ---- */
+.media-dock-btn.dock-voice {
+  --dock-btn: 3rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: var(--dock-btn);
+  height: var(--dock-btn);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--stage-raised);
+  box-shadow: var(--shadow-stage-raised);
+  color: var(--stage-ink);
+  touch-action: manipulation;
+  transition:
+    width var(--vp-open) var(--vp-ease-out),
+    margin-left var(--vp-open) var(--vp-ease-out),
+    box-shadow var(--dur-fast) var(--ease-soft),
+    transform 160ms var(--vp-ease-out);
+}
+
+.media-dock-btn.dock-voice.is-off {
+  box-shadow: var(--shadow-stage-inset);
+}
+
+.media-dock-btn.dock-voice[data-state='listening'] {
+  width: calc(var(--dock-btn) + var(--vp-wave-w) + 0.5rem);
+  margin-left: calc(-1 * (var(--vp-wave-w) + 0.5rem));
+  color: var(--accent);
+}
+
+/* A narrow phone has no room left of the dock for the bars: there the dock
+   grows and re-centres as before. */
+@media (max-width: 560px) {
+  .media-dock-btn.dock-voice[data-state='listening'] {
+    margin-left: 0;
+  }
+}
+
+.media-dock-btn.dock-voice:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.dock-voice .voice-pill__capsule {
+  display: none;
+}
+
+.dock-voice::before {
+  inset: 0;
+}
+
+.dock-voice .voice-pill__wave {
+  top: 28%;
+  right: auto;
+  left: 1rem;
+  height: 44%;
+}
+
+.dock-voice .voice-pill__glyph {
+  flex: 0 0 var(--dock-btn);
+  width: var(--dock-btn);
+  height: var(--dock-btn);
+}
+
+@media (max-width: 900px) {
+  .media-dock-btn.dock-voice {
+    --dock-btn: 2.75rem;
+  }
+}
+
+.dock-voice .voice-pill__glyph svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* The glyph stays the microphone while it listens (the recorder's stop square
+   is not used). */
+.dock-voice[data-state='listening'] .voice-pill__mic {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-dock-btn.dock-voice {
+    transition: box-shadow var(--dur-fast) var(--ease-soft);
+  }
+}
+
+/* The dock's surface is drawn by ::before, so it can reach left under the
+   microphone's level bars (is-voice-open) by the same width, at the Voice
+   Pill's own speed, while the dock box and its buttons stay where they are.
+   --vp-wave-w is set on the dock from the pill's own width (voicePillWaveWidth). */
+.media-dock {
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.media-dock::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--stage-raised) 88%, transparent);
+  box-shadow: var(--shadow-stage-raised);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transition: left 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.media-dock.is-voice-open::before {
+  left: calc(-1 * (var(--vp-wave-w) + 0.5rem));
+}
+
+/* There the pill grows the dock itself (no negative margin): nothing to reach. */
+@media (max-width: 560px) {
+  .media-dock.is-voice-open::before {
+    left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-dock::before {
+    transition: none;
+  }
+}
+
+/* ---- Input sensitivity (settings panel): one bar, your level on it now and
+   the thumb you set. Left of the thumb is cut (not sent), drawn sunken. ---- */
+.media-sensitivity {
+  margin-top: 0.85rem;
+}
+
+.media-settings-col:first-child > .media-sensitivity:first-child {
+  margin-top: 0;
+}
+
+.media-sensitivity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.media-sensitivity-value {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --level and --cut are shares of the bar (0 to 1), placed the way the range
+   input places its thumb's centre: inside half a thumb from either end. */
+.media-sensitivity-bar {
+  --level: 0;
+  --cut: 0;
+  --thumb: 0.45rem;
+  position: relative;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--ink) 5%, transparent) 0
+      calc(var(--cut) * (100% - var(--thumb)) + var(--thumb) / 2),
+    color-mix(in srgb, var(--ink) 12%, transparent)
+      calc(var(--cut) * (100% - var(--thumb)) + var(--thumb) / 2) 100%
+  );
+  box-shadow: var(--shadow-stage-inset);
+  overflow: hidden;
+}
+
+.media-sensitivity-level {
+  position: absolute;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  left: 0;
+  width: calc(var(--level) * (100% - var(--thumb)) + var(--thumb) / 2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
+  transition: background-color 120ms ease;
+}
+
+.media-sensitivity-bar[data-passing='true'] .media-sensitivity-level {
+  background: var(--accent);
+}
+
+.media-sensitivity-bar[data-quiet='true'] .media-sensitivity-level {
+  opacity: 0;
+}
+
+.media-sensitivity-bar input[type='range'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+.media-sensitivity-bar input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--thumb);
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--stage) 70%, transparent);
+}
+
+.media-sensitivity-bar input[type='range']::-moz-range-thumb {
+  width: var(--thumb);
+  height: 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--stage) 70%, transparent);
+}
+
+.media-sensitivity-bar[data-off='true'] input[type='range']::-webkit-slider-thumb {
+  background: var(--ink-soft);
+}
+
+.media-sensitivity-bar[data-off='true'] input[type='range']::-moz-range-thumb {
+  background: var(--ink-soft);
+}
+
+.media-sensitivity-bar:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.media-sensitivity-hint {
+  font-size: 0.76rem;
+}
+
+/* The waiting line inside the shared screen's name chip. */
+.media-chip-note {
+  color: color-mix(in srgb, var(--stage-ink) 72%, transparent);
+  white-space: nowrap;
+}
+
+/* In the row under a shared screen the tiles are short (the face is hidden
+   below 8rem elsewhere): the voice face or the initial comes back small,
+   centred in the space above the name chip (and the volume slider). */
+@container (min-height: 6rem) {
+  .media-stage.has-share .media-tile .media-voice-orb,
+  .media-stage.has-share .media-tile .media-avatar-initial {
+    display: grid;
+    --face: min(2.75rem, calc(100cqh - 4.9rem));
+    width: var(--face);
+    height: var(--face);
+  }
+
+  .media-stage.has-share .media-tile.self .media-voice-orb,
+  .media-stage.has-share .media-tile.self .media-avatar-initial {
+    --face: min(2.75rem, calc(100cqh - 3.4rem));
+  }
+
+  .media-stage.has-share .media-tile .media-voice-initial,
+  .media-stage.has-share .media-tile .media-avatar-initial {
+    font-size: calc(var(--face, 2.75rem) * 0.4);
+  }
+
+  .media-stage.has-share .media-tile .media-tile-fallback {
+    padding-bottom: 4.3rem;
+  }
+
+  .media-stage.has-share .media-tile.self .media-tile-fallback {
+    padding-bottom: 2.6rem;
+  }
+}
+
+/* ---- Swipe to reply on touch phones (React Bits Swipe Row) round the bubble:
+   nothing of its own shows at rest (no fill, no clipping, so the bubble keeps
+   its shadow and the expiry strips can fall); a drag right slides the bubble
+   and fades in a raised reply mark behind it. ---- */
+.msg-swipe.swipe-row,
+.msg-swipe .swipe-row__clip {
+  height: auto;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+}
+
+.msg-swipe.swipe-row {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.msg-swipe .swipe-row__surface {
+  display: block;
+  height: auto;
+  padding: 0;
+  gap: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.msg-swipe .swipe-row__rail,
+.msg-swipe .swipe-row__block,
+.msg-swipe .swipe-row__action {
+  background: transparent;
+}
+
+.msg-swipe .swipe-row__action--commit {
+  color: var(--accent-ink);
+}
+
+.msg-swipe .swipe-row__glyph > span:not(.swipe-row__icon) {
+  display: none;
+}
+
+.msg-swipe .swipe-row__icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--canvas);
+  box-shadow: var(--shadow-raised-sm);
+}
+
+.msg-swipe .swipe-row__icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+
+/* ---- 404: the number is React Bits Fuzzy Text (a canvas), in the display
+   face and the accent. ---- */
+.not-found-fuzz {
+  display: flex;
+  justify-content: flex-start;
+  /* The canvas leaves room for the fuzz on each side. */
+  margin: 0 0 var(--space-2) -1.1rem;
+  color: var(--accent);
+  font-family: var(--font-display);
+  line-height: 1;
+}
+
+.not-found-fuzz canvas {
+  max-width: 100%;
+}
+
+/* ---- Lobby: room cards carry React Bits Spotlight Card (the row keeps the
+   raised surface, the card inside lays out the content and holds the light). ---- */
+.room-list li.room-row {
+  display: block;
+  padding: 0;
+}
+
+.room-card.spotlight-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: var(--space-4) var(--space-5);
+  border-radius: inherit;
+}
+
+
+/* Lobby mode picker: React Bits Rubber Segment pressed into the canvas (the
+   thumb is clip-pathed, so it carries no shadow); the mode's line sits under
+   it. */
+.lobby-modes {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.lobby-segment.rubber-segment {
+  box-shadow: var(--shadow-inset-sm);
+  font: var(--t-ui);
+}
+
+.lobby-segment .rubber-segment__item:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rubber-segment-wait {
+  height: 48px;
+  width: 18rem;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+}
+
+.lobby-mode-blurb {
+  margin: 0;
+}
+
+.mode-dot {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--mode-color);
+}
+
+/* React Bits Border Glow on call tiles: the edge follows the tile's corners. */
+.media-tile .border-glow {
+  border-radius: inherit;
+}
+
+/* Phones: the call room's bar in short rows (the name, its details, then
+   Who's here beside the actions) instead of a tall column beside stacked
+   buttons, so the call starts higher. */
+@media (max-width: 640px) {
+  .media-room-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name name'
+      'meta meta'
+      'who actions';
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .media-room-bar > div:first-child {
+    display: contents;
+  }
+
+  .media-room-bar h1 {
+    grid-area: name;
+    margin: 0;
+    overflow: hidden;
+    font-size: 1.4rem;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .media-room-bar > div:first-child > .muted {
+    grid-area: meta;
+    margin: 0;
+    font: var(--t-caption);
+  }
+
+  .media-room-bar .invite-row {
+    grid-column: 1 / -1;
+  }
+
+  /* Both keep to the top of their row, so opening Who's here grows the list
+     under its line without moving the buttons. */
+  .media-room-bar .who-here {
+    grid-area: who;
+    align-self: start;
+    min-width: 0;
+    margin-top: var(--space-2);
+  }
+
+  .media-room-bar-actions {
+    grid-area: actions;
+    align-self: start;
+    flex-wrap: nowrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+}
+
+/* ---- The Cloudflare box (Turnstile) in a well pressed into the canvas. Its
+   inside is Cloudflare's own frame (only light/dark and its size can change),
+   so the well frames it instead of restyling it. Its place is kept while it
+   loads: the normal box takes 300x73, the compact one (under 360px) 150x148
+   (measured: the frame plus Cloudflare's own 8px). ---- */
+.panel > .turnstile-slot:not([hidden]),
+.join-gate .turnstile-slot:not([hidden]) {
+  display: block;
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: calc(300px + var(--space-2) * 2);
+  min-height: calc(73px + var(--space-2) * 2);
+  margin: var(--space-4) 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset);
+}
+
+.panel > .turnstile-slot:not([hidden]) iframe,
+.join-gate .turnstile-slot:not([hidden]) iframe {
+  display: block;
+}
+
+@media (max-width: 359.98px) {
+  .panel > .turnstile-slot:not([hidden]),
+  .join-gate .turnstile-slot:not([hidden]) {
+    min-width: calc(150px + var(--space-2) * 2);
+    min-height: calc(148px + var(--space-2) * 2);
+  }
+}
+
+/* ---- Screen sharing: the shared screen gets a stage of its own above the
+   tiles, which become one row (it scrolls sideways when crowded) ---- */
+.media-share-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: var(--space-4) var(--space-4) 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #000;
+  box-shadow: var(--shadow-stage-raised);
+}
+
+.media-share-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.media-share-stage:fullscreen {
+  margin: 0;
+  border-radius: 0;
+}
+
+.media-chip.share-chip {
+  left: var(--space-3);
+  top: var(--space-3);
+}
+
+.media-share-picks {
+  position: absolute;
+  z-index: 4;
+  top: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-2);
+  max-width: calc(100% - 12rem);
+  overflow-x: auto;
+}
+
+.media-share-pick,
+.media-share-full {
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--stage) 62%, transparent);
+  color: var(--stage-ink);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.media-share-pick {
+  padding: 0.32rem 0.75rem;
+  font: var(--t-caption);
+  white-space: nowrap;
+}
+
+.media-share-pick[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.media-share-full {
+  position: absolute;
+  z-index: 4;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+}
+
+.media-share-full svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.media-stage.has-share .media-grid {
+  flex: 0 0 auto;
+  grid-template-columns: none;
+  grid-template-rows: clamp(5.5rem, 14vh, 7rem);
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(8.5rem, 16vw, 12rem);
+  justify-content: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-top: var(--space-3);
+  /* One surface with the stage around the shared screen (no band behind the row). */
+  background: transparent;
+}
+
+.media-dock-btn.is-sharing {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.media-share-note {
+  margin: 0 0 var(--space-3);
+  font: var(--t-caption);
+  color: color-mix(in srgb, var(--stage-ink) 78%, transparent);
+}
+
+.media-share-error {
+  margin: var(--space-3) 0 0;
+}
+
+.media-share-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 900px) {
+  .media-share-stage {
+    margin: var(--space-3) var(--space-3) 0;
+  }
+
+  .media-stage.has-share .media-grid {
+    grid-template-rows: 4.5rem;
+    grid-auto-rows: 4.5rem;
+    grid-auto-columns: 7.5rem;
+    justify-content: start;
+  }
+}
+
+/* ---- Noise suppression (settings panel): Off / Light / Medium on a React
+   Bits Rubber Segment the width of the panel, three equal slots. ---- */
+.media-noise {
+  margin-top: 0.85rem;
+}
+
+.media-noise-segment.rubber-segment {
+  display: grid;
+  width: 100%;
+  box-shadow: var(--shadow-inset-sm);
+  font: var(--t-ui);
+}
+
+.rubber-segment-wait.media-noise-wait {
+  height: 36px;
+  width: 100%;
+}
+
+/* ---- Microphone shortcut (settings panel): the key, chosen by pressing it,
+   in a sunken pill like the segments above it. ---- */
+.media-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.15rem;
+}
+
+.media-shortcut-key {
+  min-width: 6.5rem;
+  min-height: 32px;
+  padding: 0.25rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-inset-sm);
+  color: var(--ink);
+  font: var(--t-ui);
+  cursor: pointer;
+}
+
+.media-shortcut-key kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.media-shortcut-key.is-recording {
+  color: var(--accent);
+}
+
+.media-shortcut-key:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* With the camera's settings too (blur, shortcut) the settings panel can
+   outgrow a short stage: it scrolls inside rather than be cut off by it (a
+   device list opens to the side that has room, GlideSelect). */
+.media-settings-panel {
+  max-height: calc(100% - 7.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* A wide stage has room for the settings in two columns, so all of them show
+   at once: devices and sensitivity on the left, the rest on the right. */
+@media (min-width: 1200px) {
+  .media-settings-panel:has(> .media-settings-col:nth-child(2) > *) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    column-gap: 1.5rem;
+    width: min(calc(100% - 1.5rem), 42rem);
+  }
+
+  .media-settings-panel .media-settings-col > :first-child {
+    margin-top: 0;
+  }
+}
+
+/* A phone's stage is short (a third of the screen with the chat open): while
+   the settings panel is open (microphone, sensitivity, noise suppression,
+   blur) the stage grows to hold it, as it does for the preflight; the panel
+   scrolls inside should the screen still be too short, never losing its top
+   under the stage's edge. */
+@media (max-width: 900px) {
+  .media-room-body.chat-open:has(.media-device-panel) {
+    grid-template-rows: min(27rem, 85dvh) min(28rem, 70dvh);
+  }
+
+  .media-stage:has(> .media-device-panel) {
+    min-height: min(27rem, 85dvh);
+  }
+
+  .media-device-panel {
+    max-height: calc(100% - 7.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* With background blur in it (video calls) the panel is taller. */
+  .media-room-body.chat-open:has(.media-device-panel .media-blur) {
+    grid-template-rows: min(40rem, 85dvh) min(28rem, 70dvh);
+  }
+
+  .media-stage:has(> .media-device-panel .media-blur) {
+    min-height: min(40rem, 85dvh);
+  }
+
+}

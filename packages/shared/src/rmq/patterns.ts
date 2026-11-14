@@ -1,0 +1,50 @@
+export const RmqRoutingKeys = {
+  SESSION_CREATED: 'session.created',
+  ROOM_CREATED: 'room.created',
+  ROOM_JOINED: 'room.joined',
+  ROOM_LEFT: 'room.left',
+  ROOM_EXPIRED: 'room.expired',
+  MATCH_QUEUED: 'match.queued',
+  MATCH_PAIRED: 'match.paired',
+  MATCH_CANCELLED: 'match.cancelled',
+  CHAT_MESSAGE_CREATED: 'chat.message.created',
+  CHAT_MESSAGE_UPDATED: 'chat.message.updated',
+  CHAT_MESSAGE_DELETED: 'chat.message.deleted',
+  CHAT_REACTION_UPDATED: 'chat.reaction.updated',
+  CHAT_READ_UPDATED: 'chat.read.updated',
+  CHAT_MESSAGE_MODERATION: 'chat.message.moderation',
+  // Published and consumed by realtime itself, so every realtime pod reaches
+  // its own sockets (typing is sealed like chat events; presence carries counts).
+  PRESENCE_UPDATED: 'presence.updated',
+  CHAT_TYPING: 'chat.typing',
+} as const;
+
+export type RmqRoutingKey = (typeof RmqRoutingKeys)[keyof typeof RmqRoutingKeys];
+
+export const RmqPatterns = {
+  PING: 'system.ping',
+  CREATE_SESSION: 'session.create',
+  GET_SESSION: 'session.get',
+  CREATE_ROOM: 'room.create',
+  JOIN_ROOM: 'room.join',
+  LEAVE_ROOM: 'room.leave',
+  GET_ROOM: 'room.get',
+  GET_ROOM_INVITE: 'room.get_invite',
+  LIST_PUBLIC_ROOMS: 'room.list_public',
+  LIST_ROOM_MEMBERS: 'room.list_members',
+  DELETE_SESSION: 'session.delete',
+  TOUCH_ROOM: 'room.touch',
+  SEND_MESSAGE: 'chat.send',
+  LIST_MESSAGES: 'chat.list',
+  EDIT_MESSAGE: 'chat.edit',
+  DELETE_MESSAGE: 'chat.delete',
+  REACT_MESSAGE: 'chat.react',
+  MARK_READ: 'chat.read',
+  LIST_READS: 'chat.list_reads',
+  ENQUEUE_MATCH: 'match.enqueue',
+  CANCEL_MATCH: 'match.cancel',
+  MATCH_STATUS: 'match.status',
+  CREATE_MATCH_ROOM: 'room.create_match',
+  ISSUE_WS_TICKET: 'session.ws_ticket',
+  ASSERT_MEMBERSHIP: 'room.assert_membership',
+} as const;

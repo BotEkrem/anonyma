@@ -1,0 +1,30 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Scrape up (gateway/core/match/realtime)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "up{job=~\"gateway|core|match|realtime\"}",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "id": 1
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["anonyma"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "title": "Anonyma Overview",
+  "uid": "anonyma-overview",
+  "version": 1
+}

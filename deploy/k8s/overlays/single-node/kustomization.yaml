@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: anonyma
+resources:
+  - ../../namespace.yaml
+  - ../../infra.yaml
+  - ../../apps.yaml
+  - ../../networkpolicy.yaml
+  - ../../observability.yaml
+  - ../../kube-state-metrics.yaml
+  - ../../ingress.yaml
+  - configmap.yaml
+  - secrets.yaml
+  - gateway-secrets.yaml
+  - grafana-secret.yaml
+  - rabbitmq-tls-configmap.yaml
+  - ingress-grafana.yaml
+  - grafana-provisioning.yaml
+  # ingress-headlamp.yaml + ingress-nginx-config.yaml are out-of-namespace —
+  # apply separately (overlay namespace: anonyma would rewrite them)
+# Cluster pulls from the private registry (see scripts/deploy-from-registry.sh).
+# Bootstrap/apply rewrites newName via REGISTRY_HOST + IMAGE_TAG — do not use *:local.
+images:
+  - name: anonyma/gateway
+    newName: anonyma/gateway
+    newTag: latest
+  - name: anonyma/core
+    newName: anonyma/core
+    newTag: latest
+  - name: anonyma/match
+    newName: anonyma/match
+    newTag: latest
+  - name: anonyma/realtime
+    newName: anonyma/realtime
+    newTag: latest
+  - name: anonyma/web
+    newName: anonyma/web
+    newTag: latest
+patches:
+  - path: patch-apps.yaml
+  - path: patch-infra.yaml
+  - path: patch-web-nodeport.yaml
+  - path: patch-grafana-nodeport.yaml
+  - path: patch-grafana.yaml

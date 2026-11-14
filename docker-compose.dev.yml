@@ -1,0 +1,211 @@
+name: anonyma-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: anonyma
+      POSTGRES_PASSWORD: anonyma
+      POSTGRES_DB: anonyma
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anonyma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: anonyma
+      MONGO_INITDB_ROOT_PASSWORD: anonyma
+      MONGO_INITDB_DATABASE: anonyma
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --quiet -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --eval "db.adminCommand({ ping: 1 }).ok" | grep -q 1',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    command:
+      [
+        "redis-server",
+        "--save",
+        "",
+        "--appendonly",
+        "no",
+        "--maxmemory",
+        "64mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: anonyma
+      RABBITMQ_DEFAULT_PASS: anonyma
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  core:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.nest
+      args: { APP: core }
+    env_file: [.env]
+    environment:
+      CORE_PORT: 3001
+      DATABASE_URL: postgresql://anonyma:anonyma@postgres:5432/anonyma
+      MONGO_URI: mongodb://anonyma:anonyma@mongo:27017/anonyma?authSource=admin
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://anonyma:anonyma@rabbitmq:5672
+      INTERNAL_RPC_SECRET: ${INTERNAL_RPC_SECRET}
+      WS_TICKET_SECRET: ${WS_TICKET_SECRET}
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY}
+    depends_on:
+      postgres: { condition: service_healthy }
+      mongo: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    ports:
+      - "127.0.0.1:3001:3001"
+
+  match:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.nest
+      args: { APP: match }
+    env_file: [.env]
+    environment:
+      MATCH_PORT: 3002
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://anonyma:anonyma@rabbitmq:5672
+      INTERNAL_RPC_SECRET: ${INTERNAL_RPC_SECRET}
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY}
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      core: { condition: service_started }
+    ports:
+      - "127.0.0.1:3002:3002"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.nest
+      args: { APP: gateway }
+    env_file: [.env]
+    environment:
+      GATEWAY_PORT: 3000
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://anonyma:anonyma@rabbitmq:5672
+      PUBLIC_WEB_ORIGIN: http://localhost:5173
+      PUBLIC_WS_URL: ws://localhost:3003/ws
+      TURNSTILE_SKIP: "true"
+      INTERNAL_RPC_SECRET: ${INTERNAL_RPC_SECRET}
+      WS_TICKET_SECRET: ${WS_TICKET_SECRET}
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      core: { condition: service_started }
+      match: { condition: service_started }
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  realtime:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.realtime
+    environment:
+      REALTIME_PORT: 3003
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://anonyma:anonyma@rabbitmq:5672
+      RABBITMQ_EXCHANGE: anonyma.events
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY}
+      WS_TICKET_SECRET: ${WS_TICKET_SECRET}
+      PUBLIC_WEB_ORIGIN: http://localhost:5173
+    depends_on:
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    ports:
+      - "127.0.0.1:3003:3003"
+
+  # Local SFU for voice/video (`LIVEKIT_*` in .env). Dev keys: devkey / secret.
+  # --node-ip 127.0.0.1 so WebRTC ICE candidates are reachable from the host browser.
+  livekit:
+    image: livekit/livekit-server:v1.8.4
+    command: ["--dev", "--bind", "0.0.0.0", "--node-ip", "127.0.0.1"]
+    ports:
+      - "127.0.0.1:7880:7880"
+      - "127.0.0.1:7881:7881"
+      - "127.0.0.1:7882:7882/udp"
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.web
+    depends_on: [gateway]
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  prometheus:
+    profiles: [observability]
+    image: prom/prometheus:v2.55.1
+    volumes:
+      - ./deploy/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "127.0.0.1:9090:9090"
+
+  grafana:
+    profiles: [observability]
+    image: grafana/grafana:11.3.1
+    environment:
+      GF_SECURITY_ADMIN_USER: anonyma
+      GF_SECURITY_ADMIN_PASSWORD: anonyma
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./deploy/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3004:3000"
+    depends_on: [prometheus]
+
+  uptime-kuma:
+    profiles: [observability]
+    image: louislam/uptime-kuma:1.23.16
+    volumes:
+      - kumadata:/app/data
+    ports:
+      - "127.0.0.1:3005:3001"
+
+volumes:
+  pgdata:
+  mongodata:
+  grafanadata:
+  kumadata:
